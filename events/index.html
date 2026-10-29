@@ -1,0 +1,931 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080d19">
+  <meta name="description" content="TLA Events — Eventos oficiais da Top Link Agency. Consulte rondas, horários e vagas disponíveis.">
+  <title>TLA Events | Top Link Agency</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080d19;
+      --panel: #111a2d;
+      --panel-2: #172239;
+      --border: #2a3853;
+      --text: #f4f6fb;
+      --muted: #a4b1c7;
+      --gold: #efc66c;
+      --green: #67d7a2;
+      --red: #ff909b;
+      --radius: 17px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(ellipse at 50% -180px,
+          #243858 0%, transparent 65%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .container {
+      width: min(1080px, calc(100% - 32px));
+      margin-inline: auto;
+    }
+
+    .topbar {
+      border-bottom: 1px solid var(--border);
+      background: #0c1423d9;
+    }
+
+    .topbar-inner {
+      min-height: 76px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-symbol {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      border: 1px solid #ac8744;
+      border-radius: 13px;
+      background: linear-gradient(135deg,
+        #273247, #111b2e);
+      color: var(--gold);
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
+
+    .brand-name {
+      font-size: 17px;
+      font-weight: 850;
+      letter-spacing: .08em;
+    }
+
+    .brand-subtitle {
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: .1em;
+    }
+
+    .header-label {
+      font-size: 12px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .hero {
+      padding: 58px 0 38px;
+      text-align: center;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      letter-spacing: .19em;
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    h1 {
+      font-size: clamp(32px, 6vw, 55px);
+      line-height: 1.12;
+      letter-spacing: -.045em;
+      margin: 13px 0;
+    }
+
+    .hero p {
+      color: var(--muted);
+      margin: 0 auto;
+      max-width: 580px;
+    }
+
+    .status-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 25px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .badge.open {
+      color: var(--green);
+      border-color: #356950;
+      background: #133528;
+    }
+
+    .badge.closed {
+      color: var(--red);
+      border-color: #75444a;
+      background: #341c29;
+    }
+
+    .badge.neutral {
+      color: var(--muted);
+    }
+
+    .refresh {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 7px 14px;
+      background: var(--panel);
+      color: var(--text);
+    }
+
+    .refresh:hover {
+      border-color: var(--gold);
+    }
+
+    .card {
+      background: linear-gradient(150deg,
+        #172239, #101827);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 26px;
+    }
+
+    .event-title {
+      font-size: clamp(24px, 4vw, 35px);
+      line-height: 1.2;
+      letter-spacing: -.035em;
+      margin: 12px 0;
+    }
+
+    .event-description {
+      color: var(--muted);
+      white-space: pre-wrap;
+    }
+
+    .event-meta {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .meta-cell {
+      background: #0e1728;
+      border: 1px solid #26344e;
+      border-radius: 12px;
+      padding: 15px;
+      min-width: 0;
+    }
+
+    .small-label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .meta-value {
+      font-weight: 750;
+      overflow-wrap: anywhere;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin: 18px 0 36px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 21px 16px;
+      text-align: center;
+    }
+
+    .stat-number {
+      display: block;
+      font-size: 31px;
+      font-weight: 850;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .section-heading {
+      margin: 0 0 18px;
+    }
+
+    .section-heading h2 {
+      margin: 0;
+      font-size: 25px;
+      letter-spacing: -.03em;
+    }
+
+    .section-heading p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .rounds {
+      display: grid;
+      gap: 17px;
+    }
+
+    .round-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 19px;
+    }
+
+    .round-title {
+      font-size: 21px;
+      font-weight: 850;
+    }
+
+    .round-time {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 20px;
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 22px;
+    }
+
+    .categories {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .category {
+      background: #0c1525;
+      border: 1px solid #293852;
+      border-radius: 13px;
+      padding: 17px;
+      min-width: 0;
+    }
+
+    .category-name {
+      color: var(--gold);
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .category-count {
+      font-size: 27px;
+      font-weight: 850;
+      margin-top: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .category-count span {
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .category-caption {
+      color: var(--muted);
+      font-size: 12px;
+      margin: 3px 0 12px;
+    }
+
+    .notice {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin: 28px 0 48px;
+      background: #111b2e;
+    }
+
+    .notice strong {
+      color: var(--gold);
+    }
+
+    .notice p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .details {
+      display: grid;
+      gap: 14px;
+      margin-top: 25px;
+    }
+
+    .detail-title {
+      font-weight: 800;
+      color: var(--gold);
+      margin-bottom: 7px;
+    }
+
+    .detail-content {
+      color: var(--muted);
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      margin: 0;
+    }
+
+    .whatsapp {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 11px 18px;
+      color: #0a2117;
+      background: var(--green);
+      border-radius: 11px;
+      font-weight: 800;
+    }
+
+    .loading,
+    .error {
+      padding: 45px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .error {
+      color: var(--red);
+    }
+
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 0;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    @media (max-width: 650px) {
+      .hero {
+        padding: 38px 0 28px;
+      }
+
+      .card {
+        padding: 19px;
+      }
+
+      .event-meta {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        gap: 8px;
+      }
+
+      .stat {
+        padding: 15px 7px;
+      }
+
+      .stat-number {
+        font-size: 25px;
+      }
+
+      .categories {
+        grid-template-columns: 1fr;
+      }
+
+      .category {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 4px 12px;
+      }
+
+      .category-count {
+        margin: 0;
+        text-align: right;
+      }
+
+      .category-caption {
+        margin: 0;
+      }
+
+      .category .badge {
+        justify-self: end;
+      }
+
+      .round-head {
+        align-items: flex-start;
+      }
+
+      .header-label {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <div class="brand-symbol">TLA</div>
+        <div>
+          <div class="brand-name">TLA EVENTS</div>
+          <div class="brand-subtitle">TOP LINK AGENCY</div>
+        </div>
+      </div>
+      <div class="header-label">Portal Oficial de Eventos</div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <section class="hero">
+      <div class="eyebrow">Top Link Agency apresenta</div>
+      <h1>Eventos que conectam talentos.</h1>
+      <p>
+        Consulte os eventos, horários e disponibilidade
+        das vagas TLA, Sponsor e Público.
+      </p>
+
+      <div class="status-line">
+        <span id="event-status" class="badge neutral">
+          A carregar...
+        </span>
+        <button id="refresh" class="refresh" type="button">
+          Atualizar vagas
+        </button>
+      </div>
+    </section>
+
+    <div id="loading" class="loading" role="status">
+      A carregar informações do evento...
+    </div>
+
+    <div id="error" class="error" role="alert" hidden></div>
+
+    <div id="content" hidden>
+
+      <section class="card">
+        <span class="eyebrow">Evento oficial</span>
+        <h2 class="event-title" id="event-name"></h2>
+        <p class="event-description" id="event-description"></p>
+
+        <div class="event-meta">
+          <div class="meta-cell">
+            <span class="small-label">Data do evento</span>
+            <div class="meta-value" id="event-date">—</div>
+          </div>
+          <div class="meta-cell">
+            <span class="small-label">Fuso horário oficial</span>
+            <div class="meta-value" id="event-timezone">—</div>
+          </div>
+          <div class="meta-cell">
+            <span class="small-label">Organizador / Host</span>
+            <div class="meta-value" id="event-host">Top Link Agency</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="stats" aria-label="Resumo das vagas">
+        <div class="stat">
+          <span class="stat-number" id="total-rounds">0</span>
+          <span class="stat-label">Rondas</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number" id="total-slots">0</span>
+          <span class="stat-label">Vagas totais</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number" id="available-slots">0</span>
+          <span class="stat-label">Vagas disponíveis</span>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-heading">
+          <h2>Rondas e disponibilidade</h2>
+          <p>
+            Os horários são apresentados no fuso do
+            evento e no fuso do seu dispositivo.
+          </p>
+        </div>
+        <div id="rounds" class="rounds"></div>
+      </section>
+
+      <section id="event-details" class="details"></section>
+
+      <aside class="notice">
+        <strong>Inscrições online em preparação</strong>
+        <p>
+          Esta versão permite consultar os horários e as
+          vagas reais. O formulário de inscrição será
+          disponibilizado após a conclusão dos testes
+          de segurança do sistema.
+        </p>
+      </aside>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      © Top Link Agency · TLA Events
+    </div>
+  </footer>
+
+  <script>
+    "use strict";
+
+    // ======================================
+    // CONFIGURACAO SUPABASE
+    // SUBSTITUI APENAS O ENDERECO ABAIXO
+    // ======================================
+
+    const API_URL =
+      "https://zuhozwndujsnnxkrcopk.supabase.co/functions/v1/tla-public-event";
+
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get("slug") || "tla-teste-interno";
+
+    const $ = (id) => document.getElementById(id);
+
+    const categoryNames = {
+      tla: "TLA",
+      sponsor: "Sponsor",
+      public: "Público"
+    };
+
+    const eventStatusNames = {
+      open: "Evento aberto",
+      paused: "Evento pausado",
+      closed: "Inscrições encerradas",
+      completed: "Evento concluído"
+    };
+
+    function element(tag, className, value) {
+      const node = document.createElement(tag);
+
+      if (className) {
+        node.className = className;
+      }
+
+      if (value !== undefined && value !== null) {
+        node.textContent = String(value);
+      }
+
+      return node;
+    }
+
+    function formatDateOnly(date) {
+      if (!date) return "—";
+
+      const parts = date.split("-").map(Number);
+      const value = new Date(Date.UTC(
+        parts[0],
+        parts[1] - 1,
+        parts[2],
+        12
+      ));
+
+      return new Intl.DateTimeFormat("pt-BR", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+        timeZone: "UTC"
+      }).format(value);
+    }
+
+    function formatDateTime(date, timeZone) {
+      try {
+        return new Intl.DateTimeFormat("pt-BR", {
+          timeZone,
+          day: "2-digit",
+          month: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+          hourCycle: "h23"
+        }).format(new Date(date));
+      } catch {
+        return "Horário indisponível";
+      }
+    }
+
+    function availabilityState(event, round, category) {
+      if (event.status !== "open") {
+        return ["Encerrado", "closed"];
+      }
+
+      if (round.status !== "open") {
+        return ["Ronda fechada", "closed"];
+      }
+
+      if (!category.registration_open) {
+        return ["Inscrições fechadas", "closed"];
+      }
+
+      if (Number(category.available) <= 0) {
+        return ["Esgotado", "closed"];
+      }
+
+      return ["Vagas disponíveis", "open"];
+    }
+
+    function makeCategory(event, round, category) {
+      const card = element("div", "category");
+      const total = Number(category.total) || 0;
+      const available = Number(category.available) || 0;
+      const [label, status] =
+        availabilityState(event, round, category);
+
+      const name = element(
+        "div",
+        "category-name",
+        categoryNames[category.category] ||
+          category.category
+      );
+
+      const count = element("div", "category-count");
+      count.append(
+        document.createTextNode(String(available)),
+        element("span", "", " / " + total)
+      );
+
+      const subtitle = element(
+        "div",
+        "category-caption",
+        "Vagas livres / total"
+      );
+
+      const badge = element(
+        "span",
+        "badge " + status,
+        label
+      );
+
+      card.append(name, count, subtitle, badge);
+      return card;
+    }
+
+    function makeRound(event, round) {
+      const card = element("article", "card");
+
+      const head = element("div", "round-head");
+      const title = element(
+        "div",
+        "round-title",
+        "Ronda " + round.number
+      );
+
+      const state = element(
+        "span",
+        "badge " +
+          (event.status === "open" &&
+           round.status === "open" ? "open" : "closed"),
+        round.status === "open" ? "Aberta" : "Fechada"
+      );
+
+      head.append(title, state);
+
+      const times = element("div", "round-time");
+
+      times.append(
+        element(
+          "span",
+          "",
+          "Horário do evento: " +
+          formatDateTime(round.start_time, event.timezone)
+        ),
+        element(
+          "span",
+          "",
+          "No seu dispositivo: " +
+          formatDateTime(
+            round.start_time,
+            Intl.DateTimeFormat().resolvedOptions().timeZone
+          )
+        )
+      );
+
+      const categories = element("div", "categories");
+
+      for (const category of round.categories || []) {
+        categories.append(
+          makeCategory(event, round, category)
+        );
+      }
+
+      card.append(head, times, categories);
+
+      return card;
+    }
+
+    function addDetail(container, title, content) {
+      if (!content) return;
+
+      const card = element("section", "card");
+      card.append(
+        element("div", "detail-title", title),
+        element("p", "detail-content", content)
+      );
+
+      container.append(card);
+    }
+
+    function renderEvent(event) {
+      document.title =
+        event.name + " | TLA Events";
+
+      $("event-name").textContent = event.name || "Evento";
+      $("event-description").textContent =
+        event.description || "Evento oficial Top Link Agency";
+
+      $("event-date").textContent =
+        formatDateOnly(event.event_date);
+
+      $("event-timezone").textContent =
+        event.timezone || "—";
+
+      $("event-host").textContent =
+        event.host_name || "Top Link Agency";
+
+      const status = $("event-status");
+      status.textContent =
+        eventStatusNames[event.status] || event.status;
+
+      status.className =
+        "badge " + (event.status === "open" ? "open" : "closed");
+
+      const rounds = Array.isArray(event.rounds)
+        ? event.rounds
+        : [];
+
+      let total = 0;
+      let available = 0;
+
+      for (const round of rounds) {
+        for (const category of round.categories || []) {
+          total += Number(category.total) || 0;
+          available += Number(category.available) || 0;
+        }
+      }
+
+      $("total-rounds").textContent = rounds.length;
+      $("total-slots").textContent = total;
+      $("available-slots").textContent = available;
+
+      const roundsContainer = $("rounds");
+      roundsContainer.replaceChildren();
+
+      if (rounds.length === 0) {
+        roundsContainer.append(
+          element("div", "card", "Ainda não existem rondas publicadas.")
+        );
+      } else {
+        for (const round of rounds) {
+          roundsContainer.append(makeRound(event, round));
+        }
+      }
+
+      const details = $("event-details");
+      details.replaceChildren();
+
+      addDetail(details, "Prêmios", event.prizes);
+      addDetail(details, "Patrocinadores", event.sponsors);
+      addDetail(details, "Regulamento", event.rules);
+
+      if (event.whatsapp_url) {
+        try {
+          const url = new URL(event.whatsapp_url);
+
+          if (
+            url.protocol === "https:" &&
+            ["wa.me", "api.whatsapp.com", "www.whatsapp.com"]
+              .includes(url.hostname)
+          ) {
+            const card = element("section", "card");
+            card.append(
+              element("div", "detail-title", "Contato")
+            );
+
+            const link = element(
+              "a",
+              "whatsapp",
+              "Entrar em contato pelo WhatsApp"
+            );
+
+            link.href = url.href;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+
+            card.append(link);
+            details.append(card);
+          }
+        } catch {
+          // URL invalida: nao apresentar link.
+        }
+      }
+
+      $("content").hidden = false;
+    }
+
+    async function loadEvent() {
+      $("loading").hidden = false;
+      $("error").hidden = true;
+      $("content").hidden = true;
+      $("refresh").disabled = true;
+
+      try {
+        if (API_URL.includes("zuhozwndujsnnxkrcopk")) {
+          throw new Error(
+            "Falta configurar o endereço do Supabase no código."
+          );
+        }
+
+        const url = new URL(API_URL);
+        url.searchParams.set("slug", slug);
+
+        const response = await fetch(url.toString(), {
+          method: "GET",
+          cache: "no-store"
+        });
+
+        if (response.status === 404) {
+          throw new Error("Evento não encontrado ou indisponível.");
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            "Não foi possível consultar o evento. HTTP " +
+            response.status
+          );
+        }
+
+        const data = await response.json();
+        renderEvent(data);
+
+      } catch (error) {
+        $("error").textContent =
+          error.message || "Erro ao carregar evento.";
+        $("error").hidden = false;
+        $("event-status").textContent = "Indisponível";
+        $("event-status").className = "badge closed";
+
+      } finally {
+        $("loading").hidden = true;
+        $("refresh").disabled = false;
+      }
+    }
+
+    $("refresh").addEventListener("click", loadEvent);
+
+    loadEvent();
+  </script>
+
+</body>
+</html>
