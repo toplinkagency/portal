@@ -1210,6 +1210,76 @@ function updateRegistrationRounds(event) {
       }
     }
 
+    // ======================================
+    // TLA EVENTS - CONFIRMACAO V1.0
+    // Apenas interface, sem envio a API
+    // ======================================
+
+    const registrationForm = $("registration-form");
+    const confirmationPanel = $("registration-confirmation");
+    const confirmationBack = $("confirmation-back");
+
+    registrationForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      // Validar os campos do formulario
+      if (!registrationForm.reportValidity()) {
+        return;
+      }
+
+      const name = $("registration-name").value.trim();
+      const poppo = $("registration-poppo").value.trim();
+      const roundSelect = $("registration-round");
+
+      const selectedOption =
+        roundSelect.selectedOptions[0];
+
+      if (
+        name.length < 2 ||
+        !/^[0-9]{1,30}$/.test(poppo) ||
+        !roundSelect.value ||
+        !selectedOption ||
+        selectedOption.disabled
+      ) {
+        return;
+      }
+
+      // Apresentar os dados sem usar HTML dinamico
+      $("confirm-name").textContent = name;
+      $("confirm-poppo").textContent = poppo;
+      $("confirm-round").textContent =
+        selectedOption.textContent.trim();
+
+      // Mostrar painel de confirmacao
+      registrationForm.hidden = true;
+      confirmationPanel.hidden = false;
+      confirmationPanel.style.display = "block";
+
+      confirmationPanel.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    });
+
+    // Permitir regressar ao formulario
+    confirmationBack.disabled = false;
+
+    confirmationBack.addEventListener("click", () => {
+      confirmationPanel.hidden = true;
+      confirmationPanel.style.display = "none";
+
+      registrationForm.hidden = false;
+
+      registrationForm.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+      });
+    });
+
+    // IMPORTANTE:
+    // O botao confirmation-submit permanece
+    // desativado e nao existe envio a API.
+
     $("refresh").addEventListener("click", loadEvent);
 
     loadEvent();
