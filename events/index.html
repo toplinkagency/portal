@@ -466,6 +466,12 @@
       }
     }
   </style>
+<!-- Cloudflare Turnstile - TLA Events -->
+<script
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+  async
+  defer
+></script>
 </head>
 
 <body>
@@ -568,6 +574,21 @@
           disponibilizado após a conclusão dos testes
           de segurança do sistema.
         </p>
+<!-- TLA Events - Teste Turnstile -->
+<div style="margin-top: 20px;">
+  <p style="margin-bottom: 12px;">
+    Verificação de segurança Cloudflare
+  </p>
+
+  <div
+    class="cf-turnstile"
+    data-sitekey="0x4AAAAAAFryZbTtLGzNVwh4"
+    data-action="tla_register"
+    data-theme="dark"
+    data-size="flexible"
+  ></div>
+</div>
+
       </aside>
 
     </div>
