@@ -901,6 +901,72 @@
       container.append(card);
     }
 
+function updateRegistrationRounds(event) {
+  const select = $("registration-round");
+
+  if (!select) return;
+
+  select.replaceChildren();
+
+  const placeholder = new Option(
+    "Selecione uma ronda",
+    ""
+  );
+
+  select.add(placeholder);
+
+  const rounds = Array.isArray(event.rounds)
+    ? event.rounds
+    : [];
+
+  let availableRounds = 0;
+
+  for (const round of rounds) {
+    const publicCategory = (
+      round.categories || []
+    ).find(
+      category => category.category === "public"
+    );
+
+    const available = Number(
+      publicCategory?.available || 0
+    );
+
+    const canRegister =
+      event.status === "open" &&
+      round.status === "open" &&
+      publicCategory?.registration_open === true &&
+      available > 0;
+
+    const label = canRegister
+      ? "Ronda " + round.number +
+        " — " + available + " vaga(s) pública(s)"
+      : "Ronda " + round.number +
+        " — Indisponível";
+
+    const option = new Option(label, round.id);
+
+    option.disabled = !canRegister;
+    select.add(option);
+
+    if (canRegister) {
+      availableRounds++;
+    }
+  }
+
+  if (rounds.length === 0) {
+    placeholder.textContent =
+      "Ainda não existem rondas";
+  } else if (availableRounds === 0) {
+    placeholder.textContent =
+      "Sem rondas públicas disponíveis";
+  }
+
+  // Apenas seleção visual.
+  // O botão de inscrição continua bloqueado.
+  select.disabled = availableRounds === 0;
+  select.value = "";
+}
     function renderEvent(event) {
       document.title =
         event.name + " | TLA Events";
@@ -942,6 +1008,7 @@
       $("total-rounds").textContent = rounds.length;
       $("total-slots").textContent = total;
       $("available-slots").textContent = available;
+      updateRegistrationRounds(event);
 
       const roundsContainer = $("rounds");
       roundsContainer.replaceChildren();
