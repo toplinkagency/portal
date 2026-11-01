@@ -566,30 +566,133 @@
 
       <section id="event-details" class="details"></section>
 
-      <aside class="notice">
-        <strong>Inscrições online em preparação</strong>
-        <p>
-          Esta versão permite consultar os horários e as
-          vagas reais. O formulário de inscrição será
-          disponibilizado após a conclusão dos testes
-          de segurança do sistema.
-        </p>
-<!-- TLA Events - Teste Turnstile -->
-<div style="margin-top: 20px;">
-  <p style="margin-bottom: 12px;">
-    Verificação de segurança Cloudflare
+      
+<aside class="notice">
+  <strong>Inscrições online em preparação</strong>
+  <p>
+    O formulário está em desenvolvimento.
+    Ainda não é possível enviar inscrições.
   </p>
+</aside>
 
-  <div
-    class="cf-turnstile"
-    data-sitekey="0x4AAAAAAFryZbTtLGzNVwh4"
-    data-action="tla_register"
-    data-theme="dark"
-    data-size="flexible"
-  ></div>
-</div>
+<section
+  id="registration-panel"
+  class="card"
+  style="margin-bottom: 48px;"
+>
+  <div class="section-heading">
+    <h2>Inscrição no evento</h2>
+    <p>
+      Preencha os seus dados para reservar uma
+      vaga pública quando as inscrições abrirem.
+    </p>
+  </div>
 
-      </aside>
+  <form id="registration-form">
+
+    <div style="display: grid; gap: 16px;">
+
+      <label style="display: grid; gap: 7px;">
+        <span>Nome na Poppo Live</span>
+        <input
+          id="registration-name"
+          name="participant_name"
+          type="text"
+          minlength="2"
+          maxlength="100"
+          autocomplete="name"
+          placeholder="Introduza o seu nome"
+          required
+          disabled
+          style="padding: 13px; border-radius: 10px;
+                 background: #0c1525; color: #f4f6fb;
+                 border: 1px solid #2a3853;
+                 font: inherit; width: 100%;"
+        >
+      </label>
+
+      <label style="display: grid; gap: 7px;">
+        <span>Poppo ID</span>
+        <input
+          id="registration-poppo"
+          name="poppo_id"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]{1,30}"
+          maxlength="30"
+          placeholder="Ex.: 12345678"
+          required
+          disabled
+          style="padding: 13px; border-radius: 10px;
+                 background: #0c1525; color: #f4f6fb;
+                 border: 1px solid #2a3853;
+                 font: inherit; width: 100%;"
+        >
+      </label>
+
+      <label style="display: grid; gap: 7px;">
+        <span>Ronda pretendida</span>
+        <select
+          id="registration-round"
+          name="round_id"
+          required
+          disabled
+          style="padding: 13px; border-radius: 10px;
+                 background: #0c1525; color: #f4f6fb;
+                 border: 1px solid #2a3853;
+                 font: inherit; width: 100%;"
+        >
+          <option value="">
+            Selecione uma ronda
+          </option>
+        </select>
+      </label>
+
+      <div style="color: #a4b1c7; font-size: 14px;">
+        Categoria: <strong style="color: #efc66c;">
+          Público
+        </strong>
+      </div>
+
+      <div>
+        <p style="margin-bottom: 12px;">
+          Verificação de segurança
+        </p>
+
+        <div
+          class="cf-turnstile"
+          data-sitekey="0x4AAAAAAFryZbTtLGzNVwh4"
+          data-action="tla_register"
+          data-theme="dark"
+          data-size="flexible"
+        ></div>
+      </div>
+
+      <p style="color: #a4b1c7; font-size: 13px;">
+        Após a confirmação definitiva da inscrição,
+        não será possível alterar ou cancelar
+        a posição.
+      </p>
+
+      <button
+        id="registration-submit"
+        type="submit"
+        disabled
+        style="padding: 14px; border: none;
+               border-radius: 11px;
+               background: #756546;
+               color: #f4f6fb;
+               font-weight: 800;
+               opacity: 0.65;
+               cursor: not-allowed;"
+      >
+        Inscrições ainda indisponíveis
+      </button>
+
+    </div>
+  </form>
+</section>
+
 
     </div>
   </main>
