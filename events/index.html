@@ -691,6 +691,103 @@
 
     </div>
   </form>
+  
+<!-- TLA EVENTS - CONFIRMACAO FINAL -->
+<div
+  id="registration-confirmation"
+  hidden
+  style="display: none; margin-top: 24px;"
+>
+  <div style="
+    background: #101c30;
+    border: 1px solid #38445a;
+    border-radius: 14px;
+    padding: 22px;
+  ">
+
+    <h3 style="margin: 0 0 10px;">
+      Confirmar inscrição
+    </h3>
+
+    <p style="color: #a4b1c7;">
+      Confira seus dados antes de confirmar
+      sua participação no evento.
+    </p>
+
+    <div style="
+      display: grid;
+      gap: 14px;
+      margin: 20px 0;
+    ">
+
+      <p>
+        Nome:
+        <strong id="confirm-name"></strong>
+      </p>
+
+      <p>
+        Poppo ID:
+        <strong id="confirm-poppo"></strong>
+      </p>
+
+      <p>
+        Ronda:
+        <strong id="confirm-round"></strong>
+      </p>
+
+      <p>
+        Categoria:
+        <strong>Público</strong>
+      </p>
+
+    </div>
+
+    <p style="
+      color: #efc66c;
+      font-size: 13px;
+      line-height: 1.6;
+    ">
+      Atenção: após a confirmação, não será
+      possível editar, cancelar ou mudar
+      de ronda.
+    </p>
+
+    <div style="
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    ">
+
+      <button
+        id="confirmation-back"
+        type="button"
+        disabled
+        style="flex: 1; padding: 13px;"
+      >
+        Voltar
+      </button>
+
+      <button
+        id="confirmation-submit"
+        type="button"
+        disabled
+        style="
+          flex: 2;
+          padding: 13px;
+          border: 0;
+          border-radius: 10px;
+          background: #756546;
+          color: white;
+          font-weight: 800;
+        "
+      >
+        Confirmar inscrição
+      </button>
+
+    </div>
+  </div>
+</div>
+
 </section>
 
 
