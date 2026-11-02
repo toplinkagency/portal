@@ -752,6 +752,22 @@
       de ronda.
     </p>
 
+<p
+  id="registration-feedback"
+  role="status"
+  aria-live="polite"
+  hidden
+  style="
+    margin: 16px 0;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #75505a;
+    background: #321e2b;
+    color: #ffb0b8;
+    font-size: 14px;
+  "
+></p>
+
 <!-- Mensagens da API de inscricoes -->
 <p
   id="registration-feedback"
@@ -1444,6 +1460,43 @@ function updateRegistrationRounds(event) {
         ? "#101f2b"
         : "#321e2b";
     }
+
+function showRegistrationFeedback(status, data = {}) {
+  const box = document.getElementById(
+    "registration-feedback"
+  );
+
+  if (!box) return;
+
+  let message = "";
+
+  if (status === 409) {
+    const error = String(data.error || "");
+
+    if (error.includes("Poppo ID")) {
+      message = "Este Poppo ID já está inscrito.";
+    } else if (error.includes("vagas")) {
+      message = "A vaga já foi ocupada. Escolha outra ronda disponível.";
+    } else {
+      message = "Esta ronda já não aceita inscrições.";
+    }
+
+  } else if (status === 403) {
+    message = "A verificação de segurança falhou.";
+
+  } else if (status === 429) {
+    message = "Demasiadas tentativas. Aguarde alguns minutos.";
+
+  } else if (status === 503) {
+    message = "As inscrições ainda estão indisponíveis.";
+
+  } else {
+    message = "Não foi possível concluir a inscrição.";
+  }
+
+  box.textContent = message;
+  box.hidden = false;
+}
 
     $("refresh").addEventListener("click", loadEvent);
 
