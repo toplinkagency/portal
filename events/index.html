@@ -752,6 +752,24 @@
       de ronda.
     </p>
 
+<!-- Mensagens da API de inscricoes -->
+<p
+  id="registration-feedback"
+  role="status"
+  aria-live="polite"
+  hidden
+  style="
+    margin: 16px 0;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #75505a;
+    background: #321e2b;
+    color: #ffb0b8;
+    font-size: 14px;
+    line-height: 1.5;
+  "
+></p>
+
     <div style="
       display: flex;
       gap: 12px;
@@ -1367,6 +1385,65 @@ function updateRegistrationRounds(event) {
     // IMPORTANTE:
     // O botao confirmation-submit permanece
     // desativado e nao existe envio a API.
+
+    // ========================================
+    // TLA EVENTS - RESPOSTAS DE INSCRICAO
+    // Apenas apresentacao, sem envio a API
+    // ========================================
+
+    function showRegistrationFeedback(status, data = {}) {
+      const box = $("registration-feedback");
+      if (!box) return;
+
+      let message = "";
+      let success = false;
+
+      if (status === 201 && data.success === true) {
+        message = "Inscrição confirmada com sucesso!";
+        success = true;
+
+      } else if (status === 409) {
+        const error = String(data.error || "");
+
+        if (error.includes("Poppo ID")) {
+          message = "Este Poppo ID já está inscrito no evento.";
+        } else if (error.includes("vagas")) {
+          message = "A vaga já foi ocupada. Escolha outra ronda disponível.";
+        } else {
+          message = "Esta ronda já não aceita inscrições.";
+        }
+
+      } else if (status === 403) {
+        message = "A verificação de segurança falhou. Atualize a verificação e tente novamente.";
+
+      } else if (status === 429) {
+        message = "Demasiadas tentativas. Aguarde alguns minutos antes de tentar novamente.";
+
+      } else if (
+        status === 503 &&
+        data.code === "REGISTRATION_DISABLED"
+      ) {
+        message = "As inscrições online ainda não estão disponíveis.";
+
+      } else {
+        message = "Não foi possível concluir a inscrição. Tente novamente mais tarde.";
+      }
+
+      box.textContent = message;
+      box.hidden = false;
+
+      box.style.color = success
+        ? "#7de2ae"
+        : "#ffb0b8";
+
+      box.style.borderColor = success
+        ? "#386b59"
+        : "#75505a";
+
+      box.style.background = success
+        ? "#101f2b"
+        : "#321e2b";
+    }
 
     $("refresh").addEventListener("click", loadEvent);
 
