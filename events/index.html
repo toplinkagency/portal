@@ -1452,38 +1452,6 @@ function updateRegistrationRounds(event) {
         : "#321e2b";
     }
     
-  if (!box) return;
-
-  let message = "";
-
-  if (status === 409) {
-    const error = String(data.error || "");
-
-    if (error.includes("Poppo ID")) {
-      message = "Este Poppo ID já está inscrito.";
-    } else if (error.includes("vagas")) {
-      message = "A vaga já foi ocupada. Escolha outra ronda disponível.";
-    } else {
-      message = "Esta ronda já não aceita inscrições.";
-    }
-
-  } else if (status === 403) {
-    message = "A verificação de segurança falhou.";
-
-  } else if (status === 429) {
-    message = "Demasiadas tentativas. Aguarde alguns minutos.";
-
-  } else if (status === 503) {
-    message = "As inscrições ainda estão indisponíveis.";
-
-  } else {
-    message = "Não foi possível concluir a inscrição.";
-  }
-
-  box.textContent = message;
-  box.hidden = false;
-}
-
     // ==========================================
     // TLA EVENTS - ENVIO DE INSCRICAO V1.0
     // Teste com backend ainda desativado
