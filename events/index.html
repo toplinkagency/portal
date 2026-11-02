@@ -751,23 +751,7 @@
       possível editar, cancelar ou mudar
       de ronda.
     </p>
-
-<p
-  id="registration-feedback"
-  role="status"
-  aria-live="polite"
-  hidden
-  style="
-    margin: 16px 0;
-    padding: 14px;
-    border-radius: 10px;
-    border: 1px solid #75505a;
-    background: #321e2b;
-    color: #ffb0b8;
-    font-size: 14px;
-  "
-></p>
-
+    
 <!-- Mensagens da API de inscricoes -->
 <p
   id="registration-feedback"
@@ -1499,6 +1483,125 @@ function updateRegistrationRounds(event) {
   box.textContent = message;
   box.hidden = false;
 }
+
+    // ==========================================
+    // TLA EVENTS - ENVIO DE INSCRICAO V1.0
+    // Teste com backend ainda desativado
+    // ==========================================
+
+    const finalButton = $("confirmation-submit");
+
+    finalButton.addEventListener("click", async () => {
+      if (!currentEvent?.id) {
+        showRegistrationFeedback(0);
+        return;
+      }
+
+      const name = $("registration-name").value.trim();
+      const poppoId = $("registration-poppo").value.trim();
+      const roundId = $("registration-round").value;
+
+      const round = (currentEvent.rounds || []).find(
+        item => item.id === roundId
+      );
+
+      const publicCategory = round?.categories?.find(
+        item => item.category === "public"
+      );
+
+      if (
+        name.length < 2 ||
+        !/^[0-9]{1,30}$/.test(poppoId) ||
+        currentEvent.status !== "open" ||
+        round?.status !== "open" ||
+        publicCategory?.registration_open !== true ||
+        Number(publicCategory?.available) < 1
+      ) {
+        showRegistrationFeedback(409, {
+          error: "Inscricoes indisponiveis"
+        });
+        return;
+      }
+
+      const token = window.turnstile?.getResponse?.();
+
+      if (!token) {
+        showRegistrationFeedback(403, {
+          error: "TURNSTILE_FAILED"
+        });
+        return;
+      }
+
+      const feedback = $("registration-feedback");
+      feedback.hidden = true;
+
+      finalButton.disabled = true;
+      confirmationBack.disabled = true;
+
+      try {
+        const response = await fetch(REGISTER_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            event_id: currentEvent.id,
+            round_id: roundId,
+            category: "public",
+            name: name,
+            poppo_id: poppoId,
+            turnstile_token: token
+          })
+        });
+
+        const data = await response.json();
+
+        if (
+          response.status === 201 &&
+          data.success === true &&
+          data.status === "confirmed" &&
+          Number.isInteger(data.position) &&
+          data.position > 0
+        ) {
+          $("success-name").textContent = name;
+          $("success-poppo").textContent = poppoId;
+          $("success-round").textContent =
+            $("registration-round")
+              .selectedOptions[0].textContent.trim();
+          $("success-position").textContent =
+            String(data.position);
+
+          confirmationPanel.hidden = true;
+          confirmationPanel.style.display = "none";
+
+          const successPanel = $("registration-success");
+          successPanel.hidden = false;
+          successPanel.style.display = "block";
+
+          successPanel.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+          });
+
+        } else {
+          showRegistrationFeedback(response.status, data);
+        }
+
+      } catch (error) {
+        console.error(
+          "Falha de comunicacao com a API de inscricoes"
+        );
+
+        showRegistrationFeedback(0);
+
+      } finally {
+        confirmationBack.disabled = false;
+
+        // Mantemos a confirmacao bloqueada
+        // ate concluirmos os testes finais.
+        finalButton.disabled = true;
+      }
+    });
 
     $("refresh").addEventListener("click", loadEvent);
 
