@@ -932,6 +932,12 @@ cursor: not-allowed;
 
     const API_URL =
       "https://zuhozwndujsnnxkrcopk.supabase.co/functions/v1/tla-public-event";
+    
+const REGISTER_API_URL =
+  "https://zuhozwndujsnnxkrcopk.supabase.co/functions/v1/super-task";
+
+let currentEvent = null;
+
 
     const params = new URLSearchParams(window.location.search);
     const slug = params.get("slug") || "tla-teste-interno";
@@ -1187,6 +1193,7 @@ function updateRegistrationRounds(event) {
   select.value = "";
 }
     function renderEvent(event) {
+      currentEvent = event;
       document.title =
         event.name + " | TLA Events";
 
@@ -1460,12 +1467,7 @@ function updateRegistrationRounds(event) {
         ? "#101f2b"
         : "#321e2b";
     }
-
-function showRegistrationFeedback(status, data = {}) {
-  const box = document.getElementById(
-    "registration-feedback"
-  );
-
+    
   if (!box) return;
 
   let message = "";
