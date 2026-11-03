@@ -1393,13 +1393,13 @@ function updateRegistrationRounds(event) {
     // O botao confirmation-submit permanece
     // desativado e nao existe envio a API.
 
-    // ========================================
-    // TLA EVENTS - RESPOSTAS DE INSCRICAO
-    // Apenas apresentacao, sem envio a API
-    // ========================================
+    // ======================================
+    // TLA EVENTS - MENSAGENS DE INSCRICAO
+    // ======================================
 
     function showRegistrationFeedback(status, data = {}) {
       const box = $("registration-feedback");
+
       if (!box) return;
 
       let message = "";
@@ -1421,10 +1421,10 @@ function updateRegistrationRounds(event) {
         }
 
       } else if (status === 403) {
-        message = "A verificação de segurança falhou. Atualize a verificação e tente novamente.";
+        message = "A verificação de segurança falhou.";
 
       } else if (status === 429) {
-        message = "Demasiadas tentativas. Aguarde alguns minutos antes de tentar novamente.";
+        message = "Demasiadas tentativas. Aguarde alguns minutos.";
 
       } else if (
         status === 503 &&
@@ -1451,11 +1451,10 @@ function updateRegistrationRounds(event) {
         ? "#101f2b"
         : "#321e2b";
     }
-    
-    // ==========================================
-    // TLA EVENTS - ENVIO DE INSCRICAO V1.0
-    // Teste com backend ainda desativado
-    // ==========================================
+
+    // ======================================
+    // TLA EVENTS - ENVIO DE INSCRICAO
+    // ======================================
 
     const finalButton = $("confirmation-submit");
 
