@@ -921,7 +921,7 @@ const REGISTER_API_URL =
   "https://zuhozwndujsnnxkrcopk.supabase.co/functions/v1/super-task";
 
 let currentEvent = null;
-
+const REGISTRATIONS_OPEN_ON_SITE = false;
 
     const params = new URLSearchParams(window.location.search);
     const slug = params.get("slug") || "tla-teste-interno";
@@ -1368,6 +1368,14 @@ function updateRegistrationRounds(event) {
       confirmationPanel.hidden = false;
       confirmationPanel.style.display = "block";
 
+const confirmButton = $("confirmation-submit");
+
+confirmButton.disabled = !REGISTRATIONS_OPEN_ON_SITE;
+confirmButton.style.opacity =
+  REGISTRATIONS_OPEN_ON_SITE ? "1" : "0.45";
+confirmButton.style.cursor =
+  REGISTRATIONS_OPEN_ON_SITE ? "pointer" : "not-allowed";
+
       confirmationPanel.scrollIntoView({
         behavior: "smooth",
         block: "center"
@@ -1566,7 +1574,7 @@ function updateRegistrationRounds(event) {
 
         // Mantemos a confirmacao bloqueada
         // ate concluirmos os testes finais.
-        finalButton.disabled = true;
+        finalButton.disabled = !REGISTRATIONS_OPEN_ON_SITE;
       }
     });
 
