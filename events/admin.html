@@ -1,0 +1,374 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+  <title>TLA Events | Administração</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    :root { color-scheme: dark; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, Arial, sans-serif;
+      background: #080f1d;
+      color: #f4f6fb;
+    }
+
+    header {
+      padding: 22px 5%;
+      background: #101b2c;
+      border-bottom: 1px solid #28364e;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .brand {
+      color: #efc66c;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .5px;
+    }
+
+    a { color: #efc66c; text-decoration: none; }
+
+    main {
+      max-width: 960px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    .panel {
+      background: #111d30;
+      border: 1px solid #30405b;
+      border-radius: 18px;
+      padding: 30px;
+      box-shadow: 0 14px 50px #0004;
+    }
+
+    .login-panel {
+      max-width: 460px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 27px;
+    }
+
+    p {
+      color: #aab8ce;
+      line-height: 1.6;
+    }
+
+    label {
+      display: block;
+      margin-top: 20px;
+      margin-bottom: 7px;
+      font-weight: 600;
+    }
+
+    input {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      background: #0b1424;
+      border: 1px solid #394960;
+      border-radius: 10px;
+      color: #fff;
+      font: inherit;
+    }
+
+    input:focus {
+      outline: 2px solid #d7b56d;
+      outline-offset: 1px;
+    }
+
+    button {
+      background: #d0ae67;
+      border: 0;
+      padding: 14px 20px;
+      border-radius: 10px;
+      color: #111827;
+      font-weight: 800;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: wait;
+    }
+
+    .login-button {
+      width: 100%;
+      margin-top: 24px;
+    }
+
+    .secondary {
+      background: #23344f;
+      color: #f4f6fb;
+    }
+
+    .status {
+      margin-top: 18px;
+      color: #ffb0b8;
+      font-size: 14px;
+    }
+
+    .success { color: #7de2ae; }
+
+    [hidden] { display: none !important; }
+
+    @media (max-width: 600px) {
+      header { padding: 18px; }
+      main { margin: 28px auto; }
+      .panel { padding: 22px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="brand">TOP LINK AGENCY | EVENTS</div>
+  <a href="./">Portal público</a>
+</header>
+
+<main>
+
+  <section id="login-panel" class="panel login-panel">
+    <h1>Acesso administrativo</h1>
+
+    <p>
+      Entre com a sua conta autorizada
+      para gerir os eventos TLA.
+    </p>
+
+    <form id="login-form">
+
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        autocomplete="username"
+        required
+      >
+
+      <label for="password">Palavra-passe</label>
+      <input
+        id="password"
+        type="password"
+        autocomplete="current-password"
+        required
+      >
+
+      <button
+        id="login-button"
+        class="login-button"
+        type="submit"
+      >
+        Entrar no painel
+      </button>
+
+      <p
+        id="login-message"
+        class="status"
+        role="status"
+        aria-live="polite"
+      ></p>
+
+    </form>
+  </section>
+
+  <section id="admin-panel" class="panel" hidden>
+
+    <h1>Painel Administrativo TLA Events</h1>
+
+    <p class="success">
+      Acesso administrativo autorizado.
+    </p>
+
+    <p>
+      Conta: <strong id="admin-email"></strong>
+    </p>
+
+    <p>
+      Permissão: <strong id="admin-role"></strong>
+    </p>
+
+    <p>
+      Autenticação concluída. A gestão de
+      eventos, rondas e participantes será
+      integrada nesta área.
+    </p>
+
+    <button id="logout-button" class="secondary">
+      Terminar sessão
+    </button>
+
+  </section>
+
+</main>
+
+<script type="module">
+
+  import { createClient } from
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+  const SUPABASE_URL =
+    "https://zuhozwndujsnnxkrcopk.supabase.co";
+
+  const SUPABASE_KEY =
+    "sb_publishable_HFYJVzuT0Dkti8zzWDU6mg_6B0aw9ow";
+
+  const supabase = createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+  const $ = id => document.getElementById(id);
+
+  const loginPanel = $("login-panel");
+  const adminPanel = $("admin-panel");
+  const loginForm = $("login-form");
+  const loginButton = $("login-button");
+  const loginMessage = $("login-message");
+
+  function showLogin(message = "") {
+    adminPanel.hidden = true;
+    loginPanel.hidden = false;
+    loginMessage.textContent = message;
+  }
+
+  function showAdmin(user, admin) {
+    $("admin-email").textContent = user.email || "";
+    $("admin-role").textContent = admin.role;
+
+    loginPanel.hidden = true;
+    adminPanel.hidden = false;
+  }
+
+  async function verifyAdministrator(user) {
+
+    const { data: admin, error } =
+      await supabase
+        .from("admin_users")
+        .select("user_id, role, is_active")
+        .eq("user_id", user.id)
+        .eq("is_active", true)
+        .maybeSingle();
+
+    if (error) {
+      throw new Error(
+        "Não foi possível verificar as permissões."
+      );
+    }
+
+    if (
+      !admin ||
+      !["super_admin", "organizer"].includes(admin.role)
+    ) {
+      await supabase.auth.signOut();
+
+      showLogin(
+        "Esta conta não tem autorização administrativa TLA."
+      );
+
+      return;
+    }
+
+    showAdmin(user, admin);
+  }
+
+  loginForm.addEventListener(
+    "submit",
+    async event => {
+      event.preventDefault();
+
+      loginButton.disabled = true;
+      loginMessage.textContent =
+        "A verificar credenciais...";
+
+      try {
+
+        const { data, error } =
+          await supabase.auth.signInWithPassword({
+            email: $("email").value.trim(),
+            password: $("password").value
+          });
+
+        if (error) {
+          showLogin(
+            "Não foi possível iniciar sessão. " +
+            "Confirme o email e a palavra-passe."
+          );
+          return;
+        }
+
+        if (!data.user) {
+          throw new Error("Sessão não encontrada.");
+        }
+
+        await verifyAdministrator(data.user);
+
+        $("password").value = "";
+
+      } catch (error) {
+        showLogin(
+          error.message ||
+          "Erro de autenticação."
+        );
+
+      } finally {
+        loginButton.disabled = false;
+      }
+    }
+  );
+
+  $("logout-button").addEventListener(
+    "click",
+    async () => {
+      await supabase.auth.signOut();
+      showLogin();
+      loginForm.reset();
+    }
+  );
+
+  // Recuperar sessão existente
+
+  async function initialize() {
+
+    try {
+      const { data, error } =
+        await supabase.auth.getUser();
+
+      if (error || !data.user) {
+        showLogin();
+        return;
+      }
+
+      await verifyAdministrator(data.user);
+
+    } catch (error) {
+      showLogin(
+        "Não foi possível recuperar a sessão."
+      );
+    }
+  }
+
+  initialize();
+
+</script>
+
+</body>
+</html>
