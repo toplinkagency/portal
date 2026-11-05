@@ -206,11 +206,32 @@
       Permissão: <strong id="admin-role"></strong>
     </p>
 
-    <p>
-      Autenticação concluída. A gestão de
-      eventos, rondas e participantes será
-      integrada nesta área.
-    </p>
+   
+<div style="margin: 28px 0;">
+
+  <h2 style="color: #efc66c;">
+    Gestão de eventos
+  </h2>
+
+  <p id="events-status" role="status">
+    A carregar eventos...
+  </p>
+
+  <div
+    id="admin-events"
+    style="display: grid; gap: 14px;"
+  ></div>
+
+  <button
+    id="reload-events"
+    type="button"
+    class="secondary"
+    style="margin-top: 20px;"
+  >
+    Atualizar eventos
+  </button>
+
+</div>
 
     <button id="logout-button" class="secondary">
       Terminar sessão
@@ -250,12 +271,106 @@
     loginMessage.textContent = message;
   }
 
+async function loadAdminEvents() {
+  const list = $("admin-events");
+  const status = $("events-status");
+
+  list.replaceChildren();
+  status.textContent = "A carregar eventos...";
+
+  const { data, error } = await supabase.rpc(
+    "tla_admin_list_events"
+  );
+
+  if (error) {
+    console.error("Erro na lista de eventos:", error.code);
+    status.textContent =
+      "Não foi possível carregar os eventos.";
+    return;
+  }
+
+  const events = Array.isArray(data) ? data : [];
+
+  if (events.length === 0) {
+    status.textContent =
+      "Ainda não existem eventos disponíveis.";
+    return;
+  }
+
+  status.textContent =
+    events.length + " evento(s) encontrado(s).";
+
+  const statusLabels = {
+    draft: "Rascunho",
+    open: "Aberto",
+    paused: "Pausado",
+    closed: "Fechado",
+    completed: "Concluído"
+  };
+
+  for (const event of events) {
+    const card = document.createElement("article");
+
+    card.style.cssText = `
+      padding: 20px;
+      background: #0c1729;
+      border: 1px solid #34445e;
+      border-radius: 12px;
+    `;
+
+    const title = document.createElement("h3");
+    title.textContent = event.event_name;
+    title.style.cssText =
+      "margin: 0 0 8px; color: #efc66c;";
+
+    const state = document.createElement("p");
+    state.textContent = event.archived
+      ? "Estado: Arquivado"
+      : "Estado: " +
+        (statusLabels[event.event_status] ||
+          event.event_status);
+
+    const date = document.createElement("p");
+    date.textContent =
+      "Data: " +
+      (event.event_date
+        ? event.event_date
+            .replace(
+              /^(\d{4})-(\d{2})-(\d{2})$/,
+              "$3/$2/$1"
+            )
+        : "Não definida");
+
+    const statistics = document.createElement("p");
+    statistics.textContent =
+      "Rondas: " + event.rounds_count +
+      " | Inscrições ativas: " +
+      event.registrations_count;
+
+    const slug = document.createElement("p");
+    slug.textContent = "Identificador: " +
+      event.event_slug;
+    slug.style.fontSize = "12px";
+
+    card.append(
+      title,
+      state,
+      date,
+      statistics,
+      slug
+    );
+
+    list.appendChild(card);
+  }
+}
+
   function showAdmin(user, admin) {
     $("admin-email").textContent = user.email || "";
     $("admin-role").textContent = admin.role;
 
     loginPanel.hidden = true;
     adminPanel.hidden = false;
+    loadAdminEvents();
   }
 
   async function verifyAdministrator(user) {
@@ -365,7 +480,10 @@
       );
     }
   }
-
+$("reload-events").addEventListener(
+  "click",
+  loadAdminEvents
+);
   initialize();
 
 </script>
