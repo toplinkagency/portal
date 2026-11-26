@@ -870,6 +870,170 @@ async function loadAdminEvents() {
       card.append(feedback);
     }
 
+    // ========================================
+    // GESTAO INDIVIDUAL DAS RONDAS
+    // ========================================
+
+    if (
+      !event.archived &&
+      Number(event.rounds_count) > 0
+    ) {
+      const manageButton =
+        document.createElement("button");
+
+      manageButton.type = "button";
+      manageButton.className = "secondary";
+      manageButton.textContent = "Gerir rondas";
+
+      const roundArea =
+        document.createElement("div");
+
+      roundArea.hidden = true;
+      roundArea.style.marginTop = "18px";
+
+      async function renderRoundDetails() {
+        roundArea.textContent = "A carregar rondas...";
+
+        const { data, error } = await supabase.rpc(
+          "tla_admin_get_rounds",
+          { p_event_id: event.event_id }
+        );
+
+        if (error) {
+          roundArea.textContent =
+            "Erro ao carregar rondas: " + error.message;
+          return;
+        }
+
+        roundArea.replaceChildren();
+
+        const categories = {
+          tla: "TLA",
+          sponsor: "Sponsor",
+          public: "Público"
+        };
+
+        const dateFormatter =
+          new Intl.DateTimeFormat("pt-BR", {
+            timeZone: "America/Sao_Paulo",
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hourCycle: "h23"
+          });
+
+        for (const round of data || []) {
+          const panel = document.createElement("div");
+          panel.className = "round-row";
+
+          const heading = document.createElement("h3");
+          heading.textContent =
+            `Ronda ${round.number} — ` +
+            dateFormatter.format(
+              new Date(round.start_time)
+            );
+
+          panel.append(heading);
+
+          const state = document.createElement("p");
+          state.textContent =
+            `Estado: ${round.status} | ` +
+            `Capacidade: ${round.capacity}`;
+
+          panel.append(state);
+
+          for (const category of round.categories || []) {
+            const line = document.createElement("div");
+
+            line.style.cssText =
+              "padding:12px 0;" +
+              "border-top:1px solid #30405b;";
+
+            const description =
+              document.createElement("p");
+
+            description.textContent =
+              `${categories[category.category]} — ` +
+              `${category.available}/${category.total} livres ` +
+              `| Inscrições: ` +
+              (category.is_open ? "Abertas" : "Fechadas");
+
+            line.append(description);
+
+            if (
+              event.event_status === "open" &&
+              round.status === "open"
+            ) {
+              const toggle = document.createElement("button");
+
+              toggle.type = "button";
+              toggle.className =
+                category.is_open ? "secondary" : "";
+
+              toggle.textContent = category.is_open
+                ? "Fechar inscrições"
+                : "Abrir inscrições";
+
+              toggle.addEventListener("click", async () => {
+                const nextOpen = !category.is_open;
+
+                if (!confirm(
+                  `${nextOpen ? "Abrir" : "Fechar"} ` +
+                  `${categories[category.category]} ` +
+                  `na Ronda ${round.number}?`
+                )) return;
+
+                toggle.disabled = true;
+
+                const { data: result, error: saveError } =
+                  await supabase.rpc(
+                    "tla_set_round_category_access",
+                    {
+                      p_round_id: round.id,
+                      p_category: category.category,
+                      p_is_open: nextOpen
+                    }
+                  );
+
+                if (saveError || result?.success === false) {
+                  alert(
+                    saveError?.message ||
+                    result?.error ||
+                    "Não foi possível guardar."
+                  );
+                  toggle.disabled = false;
+                  return;
+                }
+
+                await renderRoundDetails();
+              });
+
+              line.append(toggle);
+            }
+
+            panel.append(line);
+          }
+
+          roundArea.append(panel);
+        }
+      }
+
+      manageButton.addEventListener(
+        "click",
+        async () => {
+          roundArea.hidden = !roundArea.hidden;
+
+          if (!roundArea.hidden) {
+            await renderRoundDetails();
+          }
+        }
+      );
+
+      card.append(manageButton, roundArea);
+    }
+
     
     list.append(card);
   }
