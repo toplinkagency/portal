@@ -1035,6 +1035,257 @@ async function loadAdminEvents() {
     }
 
     
+    // ========================================
+    // TLA EVENTS - GESTAO DE PARTICIPANTES
+    // ========================================
+
+    const participantsButton =
+      document.createElement("button");
+
+    participantsButton.type = "button";
+    participantsButton.className = "secondary";
+    participantsButton.textContent = "Ver participantes";
+
+    const participantsArea =
+      document.createElement("div");
+
+    participantsArea.hidden = true;
+    participantsArea.style.marginTop = "18px";
+
+    const participantsMessage =
+      document.createElement("p");
+
+    participantsMessage.className = "message";
+    participantsMessage.setAttribute("role", "status");
+
+    async function loadParticipants() {
+      participantsArea.textContent =
+        "A carregar participantes...";
+
+      const { data, error } = await supabase.rpc(
+        "tla_admin_list_registrations",
+        { p_event_id: event.event_id }
+      );
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      const registrations =
+        Array.isArray(data) ? data : [];
+
+      participantsArea.replaceChildren();
+
+      const activeCount = registrations.filter(
+        r => ["pending", "confirmed"].includes(r.status)
+      ).length;
+
+      stats.textContent =
+        `Rondas: ${event.rounds_count}` +
+        ` | Inscrições ativas: ${activeCount}`;
+
+      const heading = document.createElement("h3");
+      heading.textContent =
+        `Participantes (${registrations.length})`;
+
+      participantsArea.append(heading);
+
+      if (registrations.length === 0) {
+        const empty = document.createElement("p");
+        empty.textContent =
+          "Ainda não existem participantes.";
+        participantsArea.append(empty);
+        return;
+      }
+
+      const categoryLabels = {
+        tla: "TLA",
+        sponsor: "Sponsor",
+        public: "Público"
+      };
+
+      const statusLabels = {
+        pending: "Pendente",
+        confirmed: "Confirmada",
+        rejected: "Rejeitada",
+        cancelled: "Cancelada"
+      };
+
+      for (const registration of registrations) {
+        const item = document.createElement("article");
+        item.className = "round-row";
+
+        const name = document.createElement("h4");
+        name.textContent =
+          registration.participant_name +
+          " — " +
+          (categoryLabels[registration.category] ||
+            registration.category);
+
+        const details = document.createElement("p");
+        details.textContent =
+          `Poppo ID: ${registration.poppo_id}` +
+          ` | Ronda ${registration.round_number}` +
+          ` | Posição ${registration.position}`;
+
+        const status = document.createElement("p");
+        status.textContent =
+          "Estado: " +
+          (statusLabels[registration.status] ||
+            registration.status);
+
+        item.append(name, details, status);
+
+        if (registration.flagged) {
+          const warning = document.createElement("p");
+          warning.textContent =
+            "⚠️ Inscrição sinalizada para revisão";
+          warning.style.color = "#efc66c";
+          item.append(warning);
+        }
+
+        // Só permitir rever inscrições pendentes
+        // das categorias reservadas.
+
+        if (
+          registration.status === "pending" &&
+          ["tla", "sponsor"].includes(
+            registration.category
+          ) &&
+          !event.archived
+        ) {
+          const actions = document.createElement("div");
+          actions.className = "actions";
+
+          for (const decision of ["approve", "reject"]) {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = decision === "approve"
+              ? "Aprovar"
+              : "Rejeitar";
+
+            if (decision === "reject") {
+              button.className = "secondary";
+            }
+
+            button.addEventListener("click", async () => {
+              let reason = null;
+
+              if (decision === "reject") {
+                reason = prompt(
+                  "Indique o motivo da rejeição:"
+                );
+
+                if (
+                  reason === null ||
+                  reason.trim().length < 3
+                ) {
+                  return;
+                }
+
+                reason = reason.trim();
+              }
+
+              const action = decision === "approve"
+                ? "aprovar"
+                : "rejeitar";
+
+              if (!confirm(
+                `Pretende ${action} a inscrição de ` +
+                `${registration.participant_name}?\n` +
+                `Poppo ID: ${registration.poppo_id}`
+              )) return;
+
+              button.disabled = true;
+              participantsMessage.classList.remove(
+                "success"
+              );
+              participantsMessage.textContent =
+                "A guardar decisão...";
+
+              try {
+                const { data: result, error: reviewError } =
+                  await supabase.rpc(
+                    "tla_review_registration",
+                    {
+                      p_registration_id:
+                        registration.registration_id,
+                      p_decision: decision,
+                      p_reason: reason
+                    }
+                  );
+
+                if (reviewError) {
+                  throw new Error(reviewError.message);
+                }
+
+                if (result?.success === false) {
+                  throw new Error(
+                    result.error ||
+                    "A decisão não foi confirmada."
+                  );
+                }
+
+                await loadParticipants();
+
+                participantsMessage.textContent =
+                  "Decisão guardada com sucesso.";
+                participantsMessage.classList.add(
+                  "success"
+                );
+
+              } catch (error) {
+                participantsMessage.textContent =
+                  error.message ||
+                  "Erro ao rever a inscrição.";
+
+              } finally {
+                button.disabled = false;
+              }
+            });
+
+            actions.append(button);
+          }
+
+          item.append(actions);
+        }
+
+        participantsArea.append(item);
+      }
+    }
+
+    participantsButton.addEventListener(
+      "click",
+      async () => {
+        participantsArea.hidden =
+          !participantsArea.hidden;
+
+        participantsButton.textContent =
+          participantsArea.hidden
+            ? "Ver participantes"
+            : "Ocultar participantes";
+
+        if (!participantsArea.hidden) {
+          participantsMessage.textContent = "";
+
+          try {
+            await loadParticipants();
+          } catch (error) {
+            participantsArea.textContent =
+              "Não foi possível carregar participantes.";
+            participantsMessage.textContent =
+              error.message;
+          }
+        }
+      }
+    );
+
+    card.append(
+      participantsButton,
+      participantsMessage,
+      participantsArea
+    );
+
     list.append(card);
   }
 }
