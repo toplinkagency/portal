@@ -3,38 +3,33 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1"
-  >
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
   <title>TLA Events | Administração</title>
 
   <style>
     * { box-sizing: border-box; }
-
     :root { color-scheme: dark; }
 
     body {
       margin: 0;
-      min-height: 100vh;
-      font-family: system-ui, Arial, sans-serif;
       background: #080f1d;
       color: #f4f6fb;
+      font-family: system-ui, Arial, sans-serif;
     }
 
     header {
-      padding: 22px 5%;
+      padding: 20px 5%;
       background: #101b2c;
       border-bottom: 1px solid #28364e;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 16px;
+      justify-content: space-between;
+      gap: 20px;
     }
 
     .brand {
       color: #efc66c;
-      font-size: 18px;
       font-weight: 800;
       letter-spacing: .5px;
     }
@@ -42,28 +37,26 @@
     a { color: #efc66c; text-decoration: none; }
 
     main {
-      max-width: 960px;
-      margin: 60px auto;
-      padding: 0 20px;
+      max-width: 1050px;
+      margin: 35px auto;
+      padding: 0 18px 60px;
     }
 
     .panel {
       background: #111d30;
       border: 1px solid #30405b;
-      border-radius: 18px;
-      padding: 30px;
-      box-shadow: 0 14px 50px #0004;
+      border-radius: 16px;
+      padding: 25px;
+      margin-bottom: 20px;
     }
 
     .login-panel {
       max-width: 460px;
-      margin: 0 auto;
+      margin: 60px auto;
     }
 
-    h1 {
-      margin: 0 0 10px;
-      font-size: 27px;
-    }
+    h1 { font-size: 26px; }
+    h2 { font-size: 21px; color: #efc66c; }
 
     p {
       color: #aab8ce;
@@ -72,36 +65,45 @@
 
     label {
       display: block;
-      margin-top: 20px;
-      margin-bottom: 7px;
+      font-size: 14px;
       font-weight: 600;
     }
 
-    input {
-      display: block;
+    input, textarea, select {
       width: 100%;
-      padding: 14px;
       background: #0b1424;
+      color: #f4f6fb;
       border: 1px solid #394960;
-      border-radius: 10px;
-      color: #fff;
+      border-radius: 9px;
+      padding: 12px;
       font: inherit;
+      margin-top: 7px;
     }
 
-    input:focus {
+    textarea {
+      min-height: 85px;
+      resize: vertical;
+    }
+
+    input:focus, textarea:focus {
       outline: 2px solid #d7b56d;
       outline-offset: 1px;
     }
 
     button {
       background: #d0ae67;
+      color: #101827;
+      padding: 12px 18px;
       border: 0;
-      padding: 14px 20px;
-      border-radius: 10px;
-      color: #111827;
+      border-radius: 9px;
       font-weight: 800;
-      font: inherit;
       cursor: pointer;
+      font-size: 14px;
+    }
+
+    button.secondary {
+      background: #23344f;
+      color: #f4f6fb;
     }
 
     button:disabled {
@@ -109,30 +111,81 @@
       cursor: wait;
     }
 
-    .login-button {
-      width: 100%;
-      margin-top: 24px;
+    .grid {
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+      gap: 18px;
     }
 
-    .secondary {
-      background: #23344f;
-      color: #f4f6fb;
+    .field { margin-bottom: 18px; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 20px;
     }
 
-    .status {
+    .event-card {
+      background: #0c1729;
+      border: 1px solid #34445e;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 14px;
+    }
+
+    .event-card h3 {
+      color: #efc66c;
+      margin-top: 0;
+    }
+
+    .round-row {
+      background: #0c1729;
+      border: 1px solid #34445e;
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .round-fields {
+      display: grid;
+      grid-template-columns: repeat(
+        4, minmax(0, 1fr)
+      );
+      gap: 12px;
+    }
+
+    .message {
       margin-top: 18px;
+      white-space: pre-line;
       color: #ffb0b8;
-      font-size: 14px;
     }
 
     .success { color: #7de2ae; }
+    .muted { color: #aab8ce; }
+
+    details {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #30405b;
+      border-radius: 10px;
+    }
+
+    summary {
+      cursor: pointer;
+      color: #efc66c;
+      font-weight: 700;
+    }
 
     [hidden] { display: none !important; }
 
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
+      .grid, .round-fields {
+        grid-template-columns: 1fr;
+      }
       header { padding: 18px; }
-      main { margin: 28px auto; }
-      .panel { padding: 22px; }
+      .panel { padding: 18px; }
     }
   </style>
 </head>
@@ -146,161 +199,413 @@
 
 <main>
 
-  <section id="login-panel" class="panel login-panel">
-    <h1>Acesso administrativo</h1>
+  <!-- LOGIN -->
 
-    <p>
-      Entre com a sua conta autorizada
-      para gerir os eventos TLA.
-    </p>
+  <section id="login-panel"
+           class="panel login-panel">
+
+    <h1>Acesso administrativo</h1>
+    <p>Entre com a sua conta autorizada.</p>
 
     <form id="login-form">
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" type="email"
+               autocomplete="username" required>
+      </div>
 
-      <label for="email">Email</label>
-      <input
-        id="email"
-        type="email"
-        autocomplete="username"
-        required
-      >
+      <div class="field">
+        <label for="password">Palavra-passe</label>
+        <input id="password" type="password"
+               autocomplete="current-password"
+               required>
+      </div>
 
-      <label for="password">Palavra-passe</label>
-      <input
-        id="password"
-        type="password"
-        autocomplete="current-password"
-        required
-      >
-
-      <button
-        id="login-button"
-        class="login-button"
-        type="submit"
-      >
+      <button id="login-button" type="submit">
         Entrar no painel
       </button>
 
-      <p
-        id="login-message"
-        class="status"
-        role="status"
-        aria-live="polite"
-      ></p>
-
+      <p id="login-message" class="message"
+         role="status"></p>
     </form>
   </section>
 
-  <section id="admin-panel" class="panel" hidden>
+  <!-- ADMIN -->
 
-    <h1>Painel Administrativo TLA Events</h1>
+  <div id="admin-panel" hidden>
 
-    <p class="success">
-      Acesso administrativo autorizado.
-    </p>
+    <section class="panel">
+      <h1>Painel Administrativo TLA Events</h1>
+      <p class="success">
+        Acesso administrativo autorizado.
+      </p>
+      <p>
+        Conta: <strong id="admin-email"></strong>
+      </p>
+      <p>
+        Permissão: <strong id="admin-role"></strong>
+      </p>
+      <button id="logout-button"
+              class="secondary" type="button">
+        Terminar sessão
+      </button>
+    </section>
 
-    <p>
-      Conta: <strong id="admin-email"></strong>
-    </p>
+    <!-- LISTA DE EVENTOS -->
 
-    <p>
-      Permissão: <strong id="admin-role"></strong>
-    </p>
+    <section class="panel">
+      <h2>Gestão de eventos</h2>
 
-   
-<div style="margin: 28px 0;">
+      <div class="actions">
+        <button id="new-event-button"
+                type="button">
+          + Criar evento
+        </button>
+        <button id="reload-events"
+                class="secondary" type="button">
+          Atualizar eventos
+        </button>
+      </div>
 
-  <h2 style="color: #efc66c;">
-    Gestão de eventos
-  </h2>
+      <p id="events-status" role="status">
+        A carregar eventos...
+      </p>
 
-  <p id="events-status" role="status">
-    A carregar eventos...
-  </p>
+      <div id="admin-events"></div>
+    </section>
 
-  <div
-    id="admin-events"
-    style="display: grid; gap: 14px;"
-  ></div>
+    <!-- CRIAR EVENTO -->
 
-  <button
-    id="reload-events"
-    type="button"
-    class="secondary"
-    style="margin-top: 20px;"
-  >
-    Atualizar eventos
-  </button>
+    <section id="event-form-panel"
+             class="panel" hidden>
 
-</div>
+      <h2>Criar novo evento</h2>
+      <p>
+        O evento será criado como rascunho.
+        Poderá configurar as rondas a seguir.
+      </p>
 
-    <button id="logout-button" class="secondary">
-      Terminar sessão
-    </button>
+      <form id="event-form">
 
-  </section>
+        <div class="field">
+          <label for="ev-name">
+            Nome do evento *
+          </label>
+          <input id="ev-name" required
+                 maxlength="150"
+                 placeholder="Ex.: TLA Auction">
+        </div>
 
+        <div class="grid">
+
+          <div class="field">
+            <label for="ev-slug">
+              Identificador URL
+            </label>
+            <input id="ev-slug"
+                   placeholder="Gerado automaticamente">
+          </div>
+
+          <div class="field">
+            <label for="ev-date">
+              Data do evento *
+            </label>
+            <input id="ev-date" type="date"
+                   required>
+          </div>
+
+        </div>
+
+        <p class="muted">
+          Fuso horário:
+          <strong>America/Sao_Paulo</strong>
+          (horário de Brasília)
+        </p>
+
+        <details>
+          <summary>
+            Informações adicionais do evento
+          </summary>
+
+          <div class="field">
+            <label for="ev-description">
+              Descrição
+            </label>
+            <textarea id="ev-description"></textarea>
+          </div>
+
+          <div class="grid">
+            <div class="field">
+              <label for="ev-host">
+                Organizador / Host
+              </label>
+              <input id="ev-host">
+            </div>
+
+            <div class="field">
+              <label for="ev-host-id">
+                Poppo ID do Host
+              </label>
+              <input id="ev-host-id">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="ev-prize">
+              Premiação
+            </label>
+            <textarea id="ev-prize"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="ev-sponsors">
+              Sponsors
+            </label>
+            <textarea id="ev-sponsors"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="ev-rules">
+              Regras
+            </label>
+            <textarea id="ev-rules"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="ev-whatsapp">
+              Link WhatsApp
+            </label>
+            <input id="ev-whatsapp" type="url"
+                   placeholder="https://...">
+          </div>
+        </details>
+
+        <div class="actions">
+          <button id="create-event-submit"
+                  type="submit">
+            Criar evento
+          </button>
+
+          <button id="cancel-event"
+                  type="button"
+                  class="secondary">
+            Cancelar
+          </button>
+        </div>
+
+        <p id="event-message" class="message"
+           role="status"></p>
+      </form>
+    </section>
+
+    <!-- CONFIGURAR RONDAS -->
+
+    <section id="rounds-panel"
+             class="panel" hidden>
+
+      <h2>Configurar rondas</h2>
+      <p>
+        Evento:
+        <strong id="rounds-event-name"></strong>
+      </p>
+
+      <p>
+        Todos os horários são introduzidos
+        no fuso de Brasília, independentemente
+        do fuso horário do seu computador.
+      </p>
+
+      <form id="rounds-form">
+
+        <div id="rounds-list"></div>
+
+        <div class="actions">
+          <button id="add-round" type="button"
+                  class="secondary">
+            + Adicionar ronda
+          </button>
+
+          <button id="save-rounds" type="submit">
+            Guardar rondas
+          </button>
+
+          <button id="cancel-rounds"
+                  type="button" class="secondary">
+            Fechar
+          </button>
+        </div>
+
+        <p id="rounds-message"
+           class="message" role="status"></p>
+
+      </form>
+
+      <p class="muted">
+        Cada ronda permite distribuir vagas
+        entre TLA, Sponsor e Público.
+        As rondas são criadas com as
+        inscrições fechadas.
+      </p>
+    </section>
+
+  </div>
 </main>
 
 <script type="module">
 
-  import { createClient } from
-    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import { createClient } from
+  "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-  const SUPABASE_URL =
-    "https://zuhozwndujsnnxkrcopk.supabase.co";
+const SUPABASE_URL =
+  "https://zuhozwndujsnnxkrcopk.supabase.co";
 
-  const SUPABASE_KEY =
-    "sb_publishable_HFYJVzuT0Dkti8zzWDU6mg_6B0aw9ow";
+const SUPABASE_KEY =
+  "hcJ+e_KT4PN,Xr-";
 
-  const supabase = createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+const TIMEZONE = "America/Sao_Paulo";
 
-  const $ = id => document.getElementById(id);
+const supabase = createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
-  const loginPanel = $("login-panel");
-  const adminPanel = $("admin-panel");
-  const loginForm = $("login-form");
-  const loginButton = $("login-button");
-  const loginMessage = $("login-message");
+const $ = id => document.getElementById(id);
 
-  function showLogin(message = "") {
-    adminPanel.hidden = true;
-    loginPanel.hidden = false;
-    loginMessage.textContent = message;
+let activeRoundEvent = null;
+
+// ========================================
+// UTILIDADES
+// ========================================
+
+function optionalValue(id) {
+  return $(id).value.trim() || null;
+}
+
+function slugify(value) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function setMessage(id, message, ok = false) {
+  const element = $(id);
+  element.textContent = message;
+  element.classList.toggle("success", ok);
+}
+
+function showLogin(message = "") {
+  $("admin-panel").hidden = true;
+  $("login-panel").hidden = false;
+  setMessage("login-message", message);
+}
+
+function showAdmin(user, admin) {
+  $("admin-email").textContent = user.email || "";
+  $("admin-role").textContent = admin.role;
+
+  $("login-panel").hidden = true;
+  $("admin-panel").hidden = false;
+
+  loadAdminEvents();
+}
+
+// ========================================
+// AUTENTICACAO
+// ========================================
+
+async function verifyAdministrator(user) {
+  const { data: admin, error } = await supabase
+    .from("admin_users")
+    .select("user_id, role, is_active")
+    .eq("user_id", user.id)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (
+    error ||
+    !admin ||
+    !["super_admin", "organizer"].includes(admin.role)
+  ) {
+    await supabase.auth.signOut();
+    showLogin("Conta sem autorização administrativa.");
+    return;
   }
+
+  showAdmin(user, admin);
+}
+
+$("login-form").addEventListener(
+  "submit",
+  async event => {
+    event.preventDefault();
+
+    const button = $("login-button");
+    button.disabled = true;
+
+    try {
+      const { data, error } =
+        await supabase.auth.signInWithPassword({
+          email: $("email").value.trim(),
+          password: $("password").value
+        });
+
+      if (error || !data.user) {
+        throw new Error(
+          "Email ou palavra-passe incorretos."
+        );
+      }
+
+      await verifyAdministrator(data.user);
+      $("password").value = "";
+
+    } catch (error) {
+      showLogin(error.message);
+
+    } finally {
+      button.disabled = false;
+    }
+  }
+);
+
+$("logout-button").addEventListener(
+  "click",
+  async () => {
+    await supabase.auth.signOut();
+    showLogin();
+    $("login-form").reset();
+  }
+);
+
+// ========================================
+// LISTAGEM DE EVENTOS
+// ========================================
 
 async function loadAdminEvents() {
   const list = $("admin-events");
-  const status = $("events-status");
-
   list.replaceChildren();
-  status.textContent = "A carregar eventos...";
+
+  $("events-status").textContent =
+    "A carregar eventos...";
 
   const { data, error } = await supabase.rpc(
     "tla_admin_list_events"
   );
 
   if (error) {
-    console.error("Erro na lista de eventos:", error.code);
-    status.textContent =
+    $("events-status").textContent =
       "Não foi possível carregar os eventos.";
     return;
   }
 
   const events = Array.isArray(data) ? data : [];
 
-  if (events.length === 0) {
-    status.textContent =
-      "Ainda não existem eventos disponíveis.";
-    return;
-  }
+  $("events-status").textContent =
+    `${events.length} evento(s) encontrado(s).`;
 
-  status.textContent =
-    events.length + " evento(s) encontrado(s).";
-
-  const statusLabels = {
+  const labels = {
     draft: "Rascunho",
     open: "Aberto",
     paused: "Pausado",
@@ -310,181 +615,484 @@ async function loadAdminEvents() {
 
   for (const event of events) {
     const card = document.createElement("article");
-
-    card.style.cssText = `
-      padding: 20px;
-      background: #0c1729;
-      border: 1px solid #34445e;
-      border-radius: 12px;
-    `;
+    card.className = "event-card";
 
     const title = document.createElement("h3");
     title.textContent = event.event_name;
-    title.style.cssText =
-      "margin: 0 0 8px; color: #efc66c;";
 
-    const state = document.createElement("p");
-    state.textContent = event.archived
-      ? "Estado: Arquivado"
-      : "Estado: " +
-        (statusLabels[event.event_status] ||
-          event.event_status);
+    const details = document.createElement("p");
+    details.textContent =
+      `Estado: ${event.archived
+        ? "Arquivado"
+        : (labels[event.event_status] ||
+           event.event_status)}` +
+      ` | Data: ${event.event_date || "—"}`;
 
-    const date = document.createElement("p");
-    date.textContent =
-      "Data: " +
-      (event.event_date
-        ? event.event_date
-            .replace(
-              /^(\d{4})-(\d{2})-(\d{2})$/,
-              "$3/$2/$1"
-            )
-        : "Não definida");
+    const stats = document.createElement("p");
+    stats.textContent =
+      `Rondas: ${event.rounds_count}` +
+      ` | Inscrições ativas: ${event.registrations_count}`;
 
-    const statistics = document.createElement("p");
-    statistics.textContent =
-      "Rondas: " + event.rounds_count +
-      " | Inscrições ativas: " +
-      event.registrations_count;
+    const identifier = document.createElement("p");
+    identifier.textContent =
+      `Identificador: ${event.event_slug}`;
 
-    const slug = document.createElement("p");
-    slug.textContent = "Identificador: " +
-      event.event_slug;
-    slug.style.fontSize = "12px";
+    card.append(title, details, stats, identifier);
 
-    card.append(
-      title,
-      state,
-      date,
-      statistics,
-      slug
-    );
+    if (
+      event.event_status === "draft" &&
+      !event.archived &&
+      Number(event.rounds_count) === 0
+    ) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = "Configurar rondas";
 
-    list.appendChild(card);
+      button.addEventListener("click", () => {
+        openRoundEditor({
+          id: event.event_id,
+          name: event.event_name,
+          date: event.event_date
+        });
+      });
+
+      card.append(button);
+    }
+
+    list.append(card);
   }
 }
 
-  function showAdmin(user, admin) {
-    $("admin-email").textContent = user.email || "";
-    $("admin-role").textContent = admin.role;
+// ========================================
+// CRIAR EVENTO
+// ========================================
 
-    loginPanel.hidden = true;
-    adminPanel.hidden = false;
-    loadAdminEvents();
+$("new-event-button").addEventListener(
+  "click",
+  () => {
+    $("rounds-panel").hidden = true;
+    $("event-form-panel").hidden = false;
+    setMessage("event-message", "");
+
+    $("event-form-panel").scrollIntoView({
+      behavior: "smooth"
+    });
   }
+);
 
-  async function verifyAdministrator(user) {
-
-    const { data: admin, error } =
-      await supabase
-        .from("admin_users")
-        .select("user_id, role, is_active")
-        .eq("user_id", user.id)
-        .eq("is_active", true)
-        .maybeSingle();
-
-    if (error) {
-      throw new Error(
-        "Não foi possível verificar as permissões."
-      );
-    }
-
-    if (
-      !admin ||
-      !["super_admin", "organizer"].includes(admin.role)
-    ) {
-      await supabase.auth.signOut();
-
-      showLogin(
-        "Esta conta não tem autorização administrativa TLA."
-      );
-
-      return;
-    }
-
-    showAdmin(user, admin);
+$("cancel-event").addEventListener(
+  "click",
+  () => {
+    $("event-form-panel").hidden = true;
   }
+);
 
-  loginForm.addEventListener(
-    "submit",
-    async event => {
-      event.preventDefault();
+$("event-form").addEventListener(
+  "submit",
+  async event => {
+    event.preventDefault();
 
-      loginButton.disabled = true;
-      loginMessage.textContent =
-        "A verificar credenciais...";
-
-      try {
-
-        const { data, error } =
-          await supabase.auth.signInWithPassword({
-            email: $("email").value.trim(),
-            password: $("password").value
-          });
-
-        if (error) {
-          showLogin(
-            "Não foi possível iniciar sessão. " +
-            "Confirme o email e a palavra-passe."
-          );
-          return;
-        }
-
-        if (!data.user) {
-          throw new Error("Sessão não encontrada.");
-        }
-
-        await verifyAdministrator(data.user);
-
-        $("password").value = "";
-
-      } catch (error) {
-        showLogin(
-          error.message ||
-          "Erro de autenticação."
-        );
-
-      } finally {
-        loginButton.disabled = false;
-      }
-    }
-  );
-
-  $("logout-button").addEventListener(
-    "click",
-    async () => {
-      await supabase.auth.signOut();
-      showLogin();
-      loginForm.reset();
-    }
-  );
-
-  // Recuperar sessão existente
-
-  async function initialize() {
+    const button = $("create-event-submit");
+    button.disabled = true;
+    setMessage("event-message", "A criar evento...");
 
     try {
-      const { data, error } =
-        await supabase.auth.getUser();
+      const name = $("ev-name").value.trim();
+      const slug =
+        $("ev-slug").value.trim() || slugify(name);
 
-      if (error || !data.user) {
-        showLogin();
-        return;
+      if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+        throw new Error(
+          "O identificador deve conter apenas " +
+          "letras minúsculas, números e hífens."
+        );
       }
 
-      await verifyAdministrator(data.user);
+      const params = {
+        p_name: name,
+        p_slug: slug,
+        p_event_date: $("ev-date").value,
+        p_timezone_name: TIMEZONE,
+        p_description: optionalValue("ev-description"),
+        p_host_name: optionalValue("ev-host"),
+        p_host_poppo_id: optionalValue("ev-host-id"),
+        p_prize_description: optionalValue("ev-prize"),
+        p_sponsors: optionalValue("ev-sponsors"),
+        p_rules: optionalValue("ev-rules"),
+        p_whatsapp_url: optionalValue("ev-whatsapp")
+      };
+
+      const { data, error } = await supabase.rpc(
+        "tla_create_event",
+        params
+      );
+
+      if (error) throw new Error(error.message);
+
+      if (data?.success !== true || !data.event_id) {
+        throw new Error(
+          "Não foi possível confirmar a criação."
+        );
+      }
+
+      setMessage(
+        "event-message",
+        "Evento criado com sucesso!",
+        true
+      );
+
+      $("event-form").reset();
+
+      await loadAdminEvents();
+
+      openRoundEditor({
+        id: data.event_id,
+        name: name,
+        date: params.p_event_date
+      });
 
     } catch (error) {
-      showLogin(
-        "Não foi possível recuperar a sessão."
-      );
+      setMessage("event-message", error.message);
+
+    } finally {
+      button.disabled = false;
     }
   }
+);
+
+// ========================================
+// CONVERSAO DE HORARIO DE BRASILIA
+// ========================================
+
+const timeFormatter = new Intl.DateTimeFormat(
+  "en-GB",
+  {
+    timeZone: TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23"
+  }
+);
+
+function brazilParts(date) {
+  return Object.fromEntries(
+    timeFormatter.formatToParts(date)
+      .filter(part => part.type !== "literal")
+      .map(part => [part.type, Number(part.value)])
+  );
+}
+
+function brazilLocalToUTC(local) {
+  const value = local.length === 16
+    ? local + ":00"
+    : local;
+
+  const match = value.match(
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})$/
+  );
+
+  if (!match) {
+    throw new Error("Horário da ronda inválido.");
+  }
+
+  const fields = match.slice(1).map(Number);
+
+  const target = Date.UTC(
+    fields[0], fields[1] - 1, fields[2],
+    fields[3], fields[4], fields[5]
+  );
+
+  let timestamp = target;
+
+  // Resolver o desfasamento real do fuso
+  for (let i = 0; i < 5; i++) {
+    const p = brazilParts(new Date(timestamp));
+
+    const wall = Date.UTC(
+      p.year, p.month - 1, p.day,
+      p.hour, p.minute, p.second
+    );
+
+    if (wall === target) break;
+
+    timestamp += target - wall;
+  }
+
+  const p = brazilParts(new Date(timestamp));
+
+  const actual = Date.UTC(
+    p.year, p.month - 1, p.day,
+    p.hour, p.minute, p.second
+  );
+
+  if (actual !== target) {
+    throw new Error(
+      "Este horário não é válido em Brasília."
+    );
+  }
+
+  return new Date(timestamp).toISOString();
+}
+
+// ========================================
+// CONFIGURAR RONDAS
+// ========================================
+
+function addRoundRow(defaultDate = "") {
+  const container = $("rounds-list");
+
+  if (container.children.length >= 200) {
+    setMessage(
+      "rounds-message",
+      "Máximo de 200 rondas por evento."
+    );
+    return;
+  }
+
+  const row = document.createElement("div");
+  row.className = "round-row";
+
+  // HTML estático: sem dados externos interpolados
+  row.innerHTML = `
+    <div class="round-fields">
+      <label>
+        Início (Brasília)
+        <input class="round-start"
+          type="datetime-local"
+          step="60" required>
+      </label>
+      <label>
+        Vagas TLA
+        <input class="round-tla"
+          type="number" min="0" max="100"
+          step="1" value="0" required>
+      </label>
+      <label>
+        Vagas Sponsor
+        <input class="round-sponsor"
+          type="number" min="0" max="100"
+          step="1" value="0" required>
+      </label>
+      <label>
+        Vagas Público
+        <input class="round-public"
+          type="number" min="0" max="100"
+          step="1" value="8" required>
+      </label>
+    </div>
+    <div class="actions">
+      <button class="remove-round secondary"
+              type="button">
+        Remover ronda
+      </button>
+    </div>
+  `;
+
+  if (defaultDate) {
+    row.querySelector(".round-start").value =
+      defaultDate + "T19:00";
+  }
+
+  row.querySelector(".remove-round")
+    .addEventListener("click", () => {
+      row.remove();
+    });
+
+  container.append(row);
+}
+
+function openRoundEditor(event) {
+  activeRoundEvent = event;
+
+  $("event-form-panel").hidden = true;
+  $("rounds-panel").hidden = false;
+
+  $("rounds-event-name").textContent = event.name;
+  $("rounds-list").replaceChildren();
+
+  setMessage("rounds-message", "");
+
+  addRoundRow(event.date);
+
+  $("rounds-panel").scrollIntoView({
+    behavior: "smooth"
+  });
+}
+
+$("add-round").addEventListener(
+  "click",
+  () => {
+    addRoundRow(activeRoundEvent?.date || "");
+  }
+);
+
+$("cancel-rounds").addEventListener(
+  "click",
+  () => {
+    $("rounds-panel").hidden = true;
+    activeRoundEvent = null;
+  }
+);
+
+$("rounds-form").addEventListener(
+  "submit",
+  async event => {
+    event.preventDefault();
+
+    const button = $("save-rounds");
+    button.disabled = true;
+
+    setMessage(
+      "rounds-message",
+      "A configurar rondas..."
+    );
+
+    try {
+      if (!activeRoundEvent?.id) {
+        throw new Error("Evento não selecionado.");
+      }
+
+      const rows = [
+        ...$("rounds-list")
+          .querySelectorAll(".round-row")
+      ];
+
+      if (rows.length === 0) {
+        throw new Error(
+          "Adicione pelo menos uma ronda."
+        );
+      }
+
+      const rounds = rows.map(row => {
+        const local = row
+          .querySelector(".round-start").value;
+
+        const tla = Number(
+          row.querySelector(".round-tla").value
+        );
+
+        const sponsor = Number(
+          row.querySelector(".round-sponsor").value
+        );
+
+        const publicSlots = Number(
+          row.querySelector(".round-public").value
+        );
+
+        const counts = [tla, sponsor, publicSlots];
+        const total = tla + sponsor + publicSlots;
+
+        if (
+          counts.some(n =>
+            !Number.isInteger(n) || n < 0
+          ) ||
+          total < 1 ||
+          total > 100
+        ) {
+          throw new Error(
+            "Cada ronda deve ter entre " +
+            "1 e 100 vagas no total."
+          );
+        }
+
+        return {
+          local_start:
+            local.length === 16
+              ? local + ":00"
+              : local,
+          starts_at: brazilLocalToUTC(local),
+          tla,
+          sponsor,
+          public: publicSlots
+        };
+      });
+
+      for (let i = 1; i < rounds.length; i++) {
+        if (
+          new Date(rounds[i].starts_at) <=
+          new Date(rounds[i - 1].starts_at)
+        ) {
+          throw new Error(
+            "As rondas devem estar por " +
+            "ordem cronológica."
+          );
+        }
+      }
+
+      const { data, error } = await supabase.rpc(
+        "tla_configure_rounds",
+        {
+          p_event_id: activeRoundEvent.id,
+          p_rounds: rounds
+        }
+      );
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (data?.success !== true) {
+        throw new Error(
+          "A configuração não foi confirmada."
+        );
+      }
+
+      setMessage(
+        "rounds-message",
+        "Rondas configuradas com sucesso!",
+        true
+      );
+
+      await loadAdminEvents();
+
+      $("rounds-panel").hidden = true;
+      activeRoundEvent = null;
+
+    } catch (error) {
+      setMessage(
+        "rounds-message",
+        error.message
+      );
+
+    } finally {
+      button.disabled = false;
+    }
+  }
+);
+
+// ========================================
+// ATUALIZACAO E SESSAO
+// ========================================
+
 $("reload-events").addEventListener(
   "click",
   loadAdminEvents
 );
-  initialize();
+
+async function initialize() {
+  try {
+    const { data, error } =
+      await supabase.auth.getUser();
+
+    if (error || !data.user) {
+      showLogin();
+      return;
+    }
+
+    await verifyAdministrator(data.user);
+
+  } catch {
+    showLogin(
+      "Não foi possível recuperar a sessão."
+    );
+  }
+}
+
+initialize();
 
 </script>
 
