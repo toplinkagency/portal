@@ -659,6 +659,218 @@ async function loadAdminEvents() {
       card.append(button);
     }
 
+    // ========================================
+    // TLA EVENTS - CONTROLOS ADMINISTRATIVOS
+    // ========================================
+
+    if (!event.archived && Number(event.rounds_count) > 0) {
+
+      const feedback = document.createElement("p");
+      feedback.className = "message";
+      feedback.setAttribute("role", "status");
+
+      const actions = document.createElement("div");
+      actions.className = "actions";
+
+      // Transicoes de estado permitidas
+      const transitions = {
+        draft: [
+          ["open", "Abrir evento"]
+        ],
+        open: [
+          ["paused", "Pausar evento"],
+          ["closed", "Fechar evento"]
+        ],
+        paused: [
+          ["open", "Retomar evento"],
+          ["closed", "Fechar evento"]
+        ],
+        closed: [
+          ["open", "Reabrir evento"],
+          ["completed", "Concluir evento"]
+        ],
+        completed: []
+      };
+
+      for (const [nextState, label] of
+        (transitions[event.event_status] || [])) {
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = label;
+        button.className =
+          nextState === "open" ? "" : "secondary";
+
+        button.addEventListener("click", async () => {
+          if (!confirm(
+            `${label}?\n\nEvento: ${event.event_name}`
+          )) return;
+
+          button.disabled = true;
+          feedback.classList.remove("success");
+          feedback.textContent = "A atualizar evento...";
+
+          try {
+            const { data, error } = await supabase.rpc(
+              "tla_change_event_status",
+              {
+                p_event_id: event.event_id,
+                p_new_status: nextState
+              }
+            );
+
+            if (error) throw new Error(error.message);
+
+            if (data?.success === false) {
+              throw new Error(
+                data.error || "Alteração não confirmada."
+              );
+            }
+
+            await loadAdminEvents();
+
+          } catch (error) {
+            feedback.textContent =
+              error.message || "Erro ao atualizar evento.";
+
+          } finally {
+            button.disabled = false;
+          }
+        });
+
+        actions.append(button);
+      }
+
+      card.append(actions);
+
+      // Categorias apenas para eventos abertos
+      if (event.event_status === "open") {
+
+        const categoryTitle = document.createElement("p");
+        categoryTitle.textContent =
+          "Inscrições por categoria — todas as rondas";
+        categoryTitle.style.fontWeight = "700";
+
+        const categorySelect =
+          document.createElement("select");
+
+        categorySelect.setAttribute(
+          "aria-label", "Categoria de inscrição"
+        );
+
+        categorySelect.style.maxWidth = "240px";
+
+        const categoryNames = {
+          public: "Público",
+          tla: "TLA",
+          sponsor: "Sponsor"
+        };
+
+        for (const [value, name] of
+          Object.entries(categoryNames)) {
+
+          categorySelect.add(
+            new Option(name, value)
+          );
+        }
+
+        const categoryActions =
+          document.createElement("div");
+
+        categoryActions.className = "actions";
+
+        function createCategoryButton(isOpen) {
+          const button =
+            document.createElement("button");
+
+          button.type = "button";
+          button.className =
+            isOpen ? "" : "secondary";
+
+          button.textContent = isOpen
+            ? "Abrir inscrições"
+            : "Fechar inscrições";
+
+          button.addEventListener("click", async () => {
+            const category = categorySelect.value;
+            const name = categoryNames[category];
+
+            const operation = isOpen
+              ? "Abrir"
+              : "Fechar";
+
+            if (!confirm(
+              `${operation} inscrições ${name} ` +
+              `em TODAS as rondas de ` +
+              `"${event.event_name}"?`
+            )) return;
+
+            button.disabled = true;
+            categorySelect.disabled = true;
+
+            feedback.classList.remove("success");
+            feedback.textContent =
+              "A atualizar inscrições...";
+
+            try {
+              const { data, error } =
+                await supabase.rpc(
+                  "tla_set_category_access_batch",
+                  {
+                    p_event_id: event.event_id,
+                    p_category: category,
+                    p_is_open: isOpen,
+                    p_round_ids: null
+                  }
+                );
+
+              if (error) {
+                throw new Error(error.message);
+              }
+
+              if (data?.success === false) {
+                throw new Error(
+                  data.error || "Operação não confirmada."
+                );
+              }
+
+              feedback.textContent =
+                `Inscrições ${name} ` +
+                (isOpen ? "abertas" : "fechadas") +
+                " em todas as rondas.";
+
+              feedback.classList.add("success");
+
+            } catch (error) {
+              feedback.textContent =
+                error.message ||
+                "Erro ao atualizar inscrições.";
+
+            } finally {
+              button.disabled = false;
+              categorySelect.disabled = false;
+            }
+          });
+
+          return button;
+        }
+
+        categoryActions.append(
+          createCategoryButton(true),
+          createCategoryButton(false)
+        );
+
+        card.append(
+          categoryTitle,
+          categorySelect,
+          categoryActions
+        );
+      }
+
+      card.append(feedback);
+    }
+
+    
     list.append(card);
   }
 }
