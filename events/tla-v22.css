@@ -1,0 +1,224 @@
+
+/* TLA EVENTS — PREMIUM V2.2
+   Melhoria visual sem alterar funcionalidades */
+
+:root {
+  --tla-gold: #f0c767;
+  --tla-purple: #a76ce0;
+  --tla-green: #70dfaa;
+  --tla-red: #ffa0ad;
+}
+
+/* Cartões administrativos */
+
+#admin-panel .event-card {
+  position: relative;
+  padding: 22px 24px;
+  margin-bottom: 16px;
+  border-radius: 17px;
+  border: 1px solid rgba(167,108,224,.43);
+  background: linear-gradient(
+    135deg,
+    rgba(34,24,66,.96),
+    rgba(13,12,34,.97)
+  );
+}
+
+#admin-panel .event-card > h3 {
+  color: #fff;
+  font-size: 21px;
+  margin: 0 0 12px;
+}
+
+#admin-panel .event-card > p {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #c6bdd9;
+}
+
+#admin-panel .event-card > .message:empty {
+  display: none;
+}
+
+/* Cartões recolhidos */
+
+#admin-panel .event-card.tla-card-collapsed
+  > :not(h3):not(p):not(.tla-card-toggle) {
+  display: none !important;
+}
+
+#admin-panel .event-card.tla-card-collapsed
+  > p.message {
+  display: none !important;
+}
+
+.tla-card-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin: 8px 0 12px;
+  background: rgba(106,57,156,.25) !important;
+  color: #f5eaff !important;
+  border: 1px solid #8462b2 !important;
+  border-radius: 10px;
+  padding: 11px 17px;
+  font-weight: 750;
+}
+
+.tla-card-toggle::before {
+  content: "▦";
+  color: var(--tla-gold);
+  font-size: 17px;
+}
+
+/* Botões e links */
+
+#admin-panel button,
+#admin-panel .public-event-link {
+  min-height: 43px;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-weight: 750;
+  font-size: 13px;
+  letter-spacing: .01em;
+}
+
+#admin-panel button:not(:disabled):hover,
+#admin-panel .public-event-link:hover {
+  box-shadow: 0 5px 20px rgba(177,79,218,.22);
+  border-color: #b985e5;
+}
+
+#admin-panel button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* Ícones decorativos, sem alterar os textos */
+
+.tla-act-create::before { content: "✦"; }
+.tla-act-refresh::before { content: "↻"; }
+.tla-act-rounds::before { content: "▦"; }
+.tla-act-people::before { content: "♙"; }
+.tla-act-open::before { content: "◉"; }
+.tla-act-close::before { content: "▣"; }
+.tla-act-pause::before { content: "Ⅱ"; }
+.tla-act-export::before { content: "↓"; }
+.tla-act-link::before { content: "↗"; }
+.tla-act-logout::before { content: "⇥"; }
+
+[class*="tla-act-"]::before {
+  display: inline-block;
+  margin-right: 9px;
+  font-weight: 900;
+  font-size: 16px;
+  vertical-align: middle;
+}
+
+#admin-panel .tla-act-open {
+  color: #80ecc0 !important;
+  background: rgba(42,128,93,.19) !important;
+  border: 1px solid #448c72 !important;
+}
+
+#admin-panel .tla-act-close {
+  color: #ffb3c0 !important;
+  background: rgba(150,53,75,.16) !important;
+  border: 1px solid #8e445b !important;
+}
+
+#admin-panel .tla-act-create {
+  color: #1a1125 !important;
+  background: linear-gradient(
+    135deg,#ffe49a,#d9aa50
+  ) !important;
+  border: 1px solid #ffe4a0 !important;
+}
+
+/* Espaçamento dos controlos */
+
+#admin-panel .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+#admin-panel .event-card > button,
+#admin-panel .event-card > .public-event-link {
+  margin: 7px 9px 7px 0;
+}
+
+#admin-panel .round-row {
+  border-radius: 13px;
+  padding: 19px;
+  background: rgba(15,13,39,.7);
+}
+
+#admin-panel .participant-toolbar {
+  gap: 12px;
+}
+
+/* Portal público */
+
+.hero h1 {
+  line-height: 1.08;
+  letter-spacing: -.05em;
+}
+
+.card,
+.stat,
+.category,
+.catalog-card {
+  border-radius: 17px;
+}
+
+#registration-panel,
+#registration-confirmation,
+#registration-success {
+  scroll-margin-top: 24px;
+}
+
+#registration-panel button:not(:disabled):hover {
+  box-shadow: 0 5px 20px rgba(240,199,103,.18);
+}
+
+/* Mobile */
+
+@media (max-width: 700px) {
+  #admin-panel .event-card {
+    padding: 18px;
+  }
+
+  #admin-panel .event-card > h3 {
+    font-size: 19px;
+  }
+
+  #admin-panel .actions button,
+  #admin-panel .participant-toolbar button {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  #admin-panel .participant-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #admin-panel .participant-toolbar input,
+  #admin-panel .participant-toolbar select {
+    width: 100%;
+  }
+
+  .hero h1 {
+    font-size: clamp(32px, 8vw, 46px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button,
+  a {
+    transition: none !important;
+  }
+}
