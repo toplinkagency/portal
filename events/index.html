@@ -1041,7 +1041,11 @@ const REGISTER_API_URL =
   "https://zuhozwndujsnnxkrcopk.supabase.co/functions/v1/super-task";
 
 let currentEvent = null;
-const REGISTRATIONS_OPEN_ON_SITE = false;
+
+const REGISTRATIONS_OPEN_ON_SITE =
+  new URLSearchParams(window.location.search)
+    .get("slug") === "tla-teste-admin";
+
 
 
 const params = new URLSearchParams(window.location.search);
@@ -1303,6 +1307,31 @@ function updateRegistrationRounds(event) {
 }
     function renderEvent(event) {
       currentEvent = event;
+      
+  if (REGISTRATIONS_OPEN_ON_SITE) {
+    const notice = document.querySelector("aside.notice");
+
+    if (notice) {
+      notice.querySelector("strong").textContent =
+        "TLA Events — Evento Piloto";
+
+      notice.querySelector("p").textContent =
+        "Este é um evento de teste. " +
+        "Uma inscrição confirmada ocupa uma vaga real " +
+        "e não poderá ser alterada ou cancelada.";
+    }
+
+    const description = document.querySelector(
+      "#registration-panel .section-heading p"
+    );
+
+    if (description) {
+      description.textContent =
+        "Preencha os seus dados, selecione a ronda " +
+        "e confirme a inscrição.";
+    }
+  }
+
       document.title =
         event.name + " | TLA Events";
 
