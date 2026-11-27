@@ -1081,12 +1081,9 @@ async function loadAdminEvents() {
 
         categoryActions.className = "actions";
 
-        function createCategoryButton(isOpen) {
-          if (refreshRoundPanel) {
-  await refreshRoundPanel();
-}
-          const button =
-            document.createElement("button");
+      function createCategoryButton(isOpen) {
+  const button =
+    document.createElement("button");
 
           button.type = "button";
           button.className =
@@ -1144,9 +1141,15 @@ async function loadAdminEvents() {
                 (isOpen ? "abertas" : "fechadas") +
                 " em todas as rondas.";
 
-              feedback.classList.add("success");
+          
+feedback.classList.add("success");
 
-            } catch (error) {
+if (refreshRoundPanel) {
+  await refreshRoundPanel();
+}
+
+} catch (error) {
+
               feedback.textContent =
                 error.message ||
                 "Erro ao atualizar inscrições.";
