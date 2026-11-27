@@ -1695,8 +1695,7 @@ confirmButton.style.cursor =
           $("success-name").textContent = name;
           $("success-poppo").textContent = poppoId;
           $("success-round").textContent =
-            $("registration-round")
-              .selectedOptions[0].textContent.trim();
+  "Ronda " + round.number;
           $("success-position").textContent =
             String(data.position);
 
@@ -1707,10 +1706,49 @@ confirmButton.style.cursor =
           successPanel.hidden = false;
           successPanel.style.display = "block";
 
-          successPanel.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
-          });
+       
+          // Atualizar as vagas apos a inscricao confirmada.
+          // Preservar sempre o comprovativo de sucesso.
+
+          try {
+            const latestUrl = new URL(API_URL);
+            latestUrl.searchParams.set("slug", slug);
+
+            const latestResponse = await fetch(
+              latestUrl.toString(),
+              {
+                method: "GET",
+                cache: "no-store"
+              }
+            );
+
+            if (!latestResponse.ok) {
+              throw new Error(
+                "HTTP " + latestResponse.status
+              );
+            }
+
+            const latestEvent =
+              await latestResponse.json();
+
+            if (
+              latestEvent?.id === currentEvent.id
+            ) {
+              renderEvent(latestEvent);
+            }
+
+          } catch (refreshError) {
+            // A inscricao ja foi confirmada.
+            // Uma falha na atualizacao das vagas
+            // nao deve mostrar um erro de inscricao.
+
+            console.warn(
+              "Inscricao confirmada, mas nao foi " +
+              "possivel atualizar as vagas.",
+              refreshError
+            );
+          }
+
 
         } else {
           showRegistrationFeedback(response.status, data);
