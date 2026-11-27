@@ -665,7 +665,7 @@
         </div>
         <div class="stat">
           <span class="stat-number" id="total-slots">0</span>
-          <span class="stat-label">Vagas totais</span>
+          <span class="stat-label">Vagas públicas disponíveis</span>
         </div>
         <div class="stat">
           <span class="stat-number" id="available-slots">0</span>
@@ -1365,7 +1365,16 @@ function updateRegistrationRounds(event) {
       for (const round of rounds) {
         for (const category of round.categories || []) {
           total += Number(category.total) || 0;
-          available += Number(category.available) || 0;
+          
+if (
+  event.status === "open" &&
+  round.status === "open" &&
+  category.category === "public" &&
+  category.registration_open === true
+) {
+  available += Number(category.available) || 0;
+}
+
         }
       }
 
@@ -1428,6 +1437,69 @@ function updateRegistrationRounds(event) {
 
       $("content").hidden = false;
     }
+
+let availabilityRefreshRunning = false;
+
+async function refreshLiveAvailability() {
+  if (
+    !slug ||
+    !currentEvent?.id ||
+    availabilityRefreshRunning
+  ) return;
+
+  // Não interromper a confirmação de uma inscrição.
+  const confirmation = $("registration-confirmation");
+
+  if (!confirmation.hidden) return;
+
+  availabilityRefreshRunning = true;
+
+  try {
+    const url = new URL(API_URL);
+    url.searchParams.set("slug", slug);
+
+    const response = await fetch(url.toString(), {
+      method: "GET",
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      console.warn(
+        "Atualização de vagas: HTTP",
+        response.status
+      );
+      return;
+    }
+
+    const latestEvent = await response.json();
+
+    if (latestEvent?.id !== currentEvent.id) return;
+
+    // Preservar a ronda selecionada quando continuar válida.
+    const select = $("registration-round");
+    const selectedRoundId = select.value;
+
+    renderEvent(latestEvent);
+
+    const previousOption = Array.from(select.options)
+      .find(option =>
+        option.value === selectedRoundId &&
+        !option.disabled
+      );
+
+    if (previousOption) {
+      select.value = selectedRoundId;
+    }
+
+  } catch (error) {
+    console.warn(
+      "Não foi possível atualizar as vagas:",
+      error
+    );
+  } finally {
+    availabilityRefreshRunning = false;
+  }
+}
 
     async function loadEvent() {
       $("loading").hidden = false;
@@ -1534,6 +1606,7 @@ confirmButton.style.cursor =
         behavior: "smooth",
         block: "center"
       });
+      await refreshLiveAvailability();
     });
 
     // Permitir regressar ao formulario
@@ -1877,6 +1950,21 @@ async function loadCatalog() {
 }
 
   
+// Atualizar vagas a cada 60 segundos,
+// apenas quando a página estiver visível.
+setInterval(() => {
+  if (slug && !document.hidden) {
+    refreshLiveAvailability();
+  }
+}, 60000);
+
+// Atualizar ao regressar ao separador.
+document.addEventListener("visibilitychange", () => {
+  if (slug && !document.hidden) {
+    refreshLiveAvailability();
+  }
+});
+
 $("refresh").addEventListener("click", loadEvent);
 
 if (slug) {
