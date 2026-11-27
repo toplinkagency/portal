@@ -465,6 +465,98 @@
         display: none;
       }
     }
+    
+/* TLA EVENTS - CATALOGO PUBLICO V1 */
+
+.catalog-section {
+  margin: 0 0 54px;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(auto-fit, minmax(min(100%, 290px), 1fr));
+  gap: 18px;
+}
+
+.catalog-card {
+  background: linear-gradient(
+    150deg, #17243b, #101a2d
+  );
+  border: 1px solid #344661;
+  border-radius: 17px;
+  padding: 24px;
+  min-width: 0;
+}
+
+.catalog-card h3 {
+  color: #efc66c;
+  font-size: 21px;
+  margin: 10px 0;
+}
+
+.catalog-card p {
+  color: #a4b1c7;
+  overflow-wrap: anywhere;
+}
+
+.catalog-card .catalog-date {
+  color: #f4f6fb;
+  font-weight: 700;
+}
+
+.catalog-card .catalog-availability {
+  color: #7de2ae;
+  font-weight: 700;
+}
+
+.catalog-card .catalog-action {
+  display: inline-flex;
+  margin-top: 16px;
+  background: #d0ae67;
+  padding: 12px 18px;
+  border-radius: 10px;
+  color: #111827;
+  font-weight: 800;
+}
+
+.catalog-back {
+  display: inline-block;
+  color: #efc66c;
+  margin: 0 0 28px;
+  font-weight: 700;
+}
+
+.catalog-empty {
+  padding: 32px;
+  text-align: center;
+  border: 1px dashed #344661;
+  border-radius: 16px;
+  background: #111a2d;
+  color: #a4b1c7;
+}
+
+@media (max-width: 650px) {
+  .catalog-card {
+    padding: 20px;
+  }
+
+  .catalog-card .catalog-action {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  #registration-submit {
+    width: 100%;
+  }
+
+  #registration-confirmation button {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
   </style>
 <!-- Cloudflare Turnstile - TLA Events -->
 <script
@@ -508,6 +600,34 @@
         </button>
       </div>
     </section>
+
+<section
+  id="catalog"
+  class="catalog-section"
+  hidden
+>
+  <div class="section-heading">
+    <h2>Próximos eventos TLA</h2>
+    <p>
+      Descubra os próximos eventos e consulte
+      as rondas e vagas disponíveis.
+    </p>
+  </div>
+
+  <div
+    id="catalog-cards"
+    class="catalog-grid"
+  ></div>
+</section>
+
+<a
+  id="back-catalog"
+  href="./"
+  class="catalog-back"
+  hidden
+>
+  ← Ver todos os eventos
+</a>
 
     <div id="loading" class="loading" role="status">
       A carregar informações do evento...
@@ -923,8 +1043,13 @@ const REGISTER_API_URL =
 let currentEvent = null;
 const REGISTRATIONS_OPEN_ON_SITE = false;
 
-    const params = new URLSearchParams(window.location.search);
-    const slug = params.get("slug") || "tla-teste-interno";
+
+const params = new URLSearchParams(window.location.search);
+const slug = params.get("slug");
+
+const CATALOG_API_URL =
+  "https://zuhozwndujsnnxkrcopk.supabase.co/functions/v1/tla-public-catalog";
+
 
     const $ = (id) => document.getElementById(id);
 
@@ -1578,9 +1703,136 @@ confirmButton.style.cursor =
       }
     });
 
-    $("refresh").addEventListener("click", loadEvent);
+// ==========================================
+// TLA EVENTS - CATALOGO PUBLICO
+// ==========================================
 
-    loadEvent();
+async function loadCatalog() {
+  const loading = $("loading");
+  const errorBox = $("error");
+  const container = $("catalog-cards");
+
+  loading.textContent = "A carregar próximos eventos...";
+  loading.hidden = false;
+  errorBox.hidden = true;
+  container.replaceChildren();
+
+  try {
+    const response = await fetch(CATALOG_API_URL, {
+      method: "GET",
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        "Não foi possível consultar os eventos."
+      );
+    }
+
+    const result = await response.json();
+
+    const events = Array.isArray(result.events)
+      ? result.events
+      : [];
+
+    if (events.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "catalog-empty";
+      empty.textContent =
+        "Ainda não existem próximos eventos públicos disponíveis.";
+      container.append(empty);
+      return;
+    }
+
+    for (const event of events) {
+      const card = document.createElement("article");
+      card.className = "catalog-card";
+
+      const state = document.createElement("span");
+      state.className =
+        "badge " + (
+          event.status === "open" ? "open" : "closed"
+        );
+      state.textContent =
+        event.status === "open"
+          ? "Evento aberto"
+          : "Evento pausado";
+
+      const title = document.createElement("h3");
+      title.textContent = event.name;
+
+      const date = document.createElement("p");
+      date.className = "catalog-date";
+      date.textContent =
+        "Data: " + formatDateOnly(event.event_date);
+
+      const description = document.createElement("p");
+      description.textContent =
+        event.description || "Evento oficial TLA.";
+
+      const rounds = document.createElement("p");
+      rounds.textContent =
+        "Rondas: " + Number(event.rounds_count || 0);
+
+      const availability = document.createElement("p");
+      availability.className = "catalog-availability";
+      availability.textContent =
+        "Vagas públicas livres: " +
+        Number(event.public_available || 0);
+
+      const link = document.createElement("a");
+      link.className = "catalog-action";
+      link.href =
+        "./?slug=" + encodeURIComponent(event.slug);
+      link.textContent = "Ver evento e rondas";
+
+      card.append(
+        state,
+        title,
+        date,
+        description,
+        rounds,
+        availability,
+        link
+      );
+
+      container.append(card);
+    }
+
+  } catch (error) {
+    errorBox.textContent =
+      error.message || "Erro ao carregar eventos.";
+    errorBox.hidden = false;
+
+  } finally {
+    loading.hidden = true;
+  }
+}
+
+  
+$("refresh").addEventListener("click", loadEvent);
+
+if (slug) {
+  $("catalog").hidden = true;
+  $("back-catalog").hidden = false;
+
+  loadEvent();
+
+} else {
+  $("content").hidden = true;
+  $("catalog").hidden = false;
+
+  const statusLine = document.querySelector(
+    ".status-line"
+  );
+
+  if (statusLine) {
+    statusLine.hidden = true;
+  }
+
+  loadCatalog();
+}
+
   </script>
 
 </body>
