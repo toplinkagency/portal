@@ -1,0 +1,497 @@
+
+/* =========================================
+   TOP LINK AGENCY — TLA EVENTS PREMIUM V2
+   Identidade visual partilhada
+   ========================================= */
+
+:root {
+  color-scheme: dark;
+  --bg: #0c0b22;
+  --panel: #15132d;
+  --panel-2: #20183d;
+  --border: #594184;
+  --text: #faf8ff;
+  --muted: #c0b8d5;
+  --gold: #f0c767;
+  --green: #70efb0;
+  --red: #ff9aaf;
+  --tla-magenta: #e146d7;
+  --tla-purple: #963be5;
+  --radius: 18px;
+}
+
+body {
+  color: var(--text);
+  background:
+    radial-gradient(
+      ellipse at 85% 12%,
+      rgba(176, 44, 217, .21),
+      transparent 42%
+    ),
+    linear-gradient(
+      155deg,
+      rgba(10, 9, 29, .83),
+      rgba(10, 9, 29, .95)
+    ),
+    url("./tla-background.png") center top / cover no-repeat;
+  background-color: var(--bg);
+  min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+a,
+button {
+  transition:
+    background-color .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* Logotipo original — sem recriação.
+   A janela oculta apenas as margens pretas
+   existentes no ficheiro original. */
+
+.tla-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.tla-logo-window {
+  display: block;
+  position: relative;
+  width: 235px;
+  height: 62px;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.tla-logo-window img {
+  position: absolute;
+  width: 620px;
+  max-width: none;
+  height: auto;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: screen;
+}
+
+.tla-wordmark {
+  border-left: 1px solid rgba(240, 199, 103, .55);
+  padding-left: 15px;
+  font-size: 15px;
+  font-weight: 850;
+  letter-spacing: .08em;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+/* Cabeçalhos */
+
+.topbar,
+body > header {
+  background: rgba(13, 10, 35, .91);
+  border-bottom: 1px solid rgba(183, 91, 233, .35);
+  backdrop-filter: blur(14px);
+}
+
+.topbar-inner {
+  min-height: 86px;
+}
+
+.header-label {
+  color: var(--gold);
+}
+
+body > header a:hover {
+  color: #fff3ce;
+}
+
+/* Hero público */
+
+.hero {
+  position: relative;
+  text-align: left;
+  min-height: 370px;
+  padding: 62px 290px 48px 6px;
+}
+
+.hero .eyebrow {
+  color: var(--gold);
+}
+
+.hero h1 {
+  font-size: clamp(36px, 5vw, 66px);
+  letter-spacing: -.05em;
+  line-height: 1.06;
+  max-width: 780px;
+}
+
+.hero p {
+  margin: 0;
+  max-width: 650px;
+  color: #ddd5eb;
+}
+
+.hero .status-line {
+  justify-content: flex-start;
+}
+
+.refresh:hover {
+  border-color: var(--tla-magenta);
+  box-shadow: 0 0 18px rgba(225, 70, 215, .22);
+}
+
+/* Mascote NEO — imagem original.
+   Apenas recorte visual da grelha PNG. */
+
+.tla-neo-crop {
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
+}
+
+.tla-neo-crop img {
+  position: absolute;
+  width: 1200px;
+  max-width: none;
+  height: auto;
+  mix-blend-mode: screen;
+}
+
+.tla-neo-crop--hero {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 252px;
+  height: 380px;
+}
+
+.tla-neo-crop--hero img {
+  left: 0;
+  top: 0;
+}
+
+.tla-neo-crop--admin {
+  position: absolute;
+  right: 16px;
+  top: 5px;
+  width: 270px;
+  height: 355px;
+}
+
+.tla-neo-crop--admin img {
+  left: -280px;
+  top: -35px;
+}
+
+/* Cartões e superfícies */
+
+.card,
+.panel,
+.event-card,
+.round-row,
+.catalog-card,
+.stat {
+  border: 1px solid rgba(158, 85, 223, .46);
+  background: linear-gradient(
+    145deg,
+    rgba(34, 24, 67, .94),
+    rgba(14, 14, 37, .98)
+  );
+  border-radius: 18px;
+  box-shadow: 0 14px 42px rgba(0, 0, 0, .18);
+}
+
+.card,
+.panel {
+  padding: 26px;
+}
+
+.event-card {
+  padding: 22px;
+  margin-top: 16px;
+}
+
+.event-card h3,
+.catalog-card h3 {
+  color: var(--gold);
+}
+
+#content > .card:first-child,
+#admin-panel > .panel:first-child {
+  border-color: rgba(225, 70, 215, .7);
+  box-shadow:
+    0 0 25px rgba(184, 59, 222, .13),
+    0 18px 45px rgba(0, 0, 0, .2);
+}
+
+.meta-cell,
+.stat,
+.category {
+  background: rgba(13, 13, 35, .72);
+  border: 1px solid rgba(133, 87, 190, .45);
+  border-radius: 13px;
+}
+
+.category-name {
+  color: var(--gold);
+}
+
+.stat-number,
+.category-count {
+  color: #fff;
+}
+
+.catalog-card:hover {
+  border-color: var(--tla-magenta);
+  box-shadow: 0 0 23px rgba(198, 59, 226, .18);
+}
+
+.catalog-action,
+button:not(.secondary):not(.refresh),
+#registration-submit {
+  background: linear-gradient(
+    135deg, #f8d77f, #d6a64c
+  );
+  color: #181023;
+  border: 1px solid #ffe4a0;
+  border-radius: 10px;
+  font-weight: 850;
+}
+
+button.secondary,
+.public-event-link,
+.refresh {
+  background: #241a43;
+  color: #f8f2ff;
+  border: 1px solid #65448f;
+  border-radius: 10px;
+}
+
+button:not(:disabled):hover,
+.catalog-action:hover,
+.public-event-link:hover {
+  box-shadow: 0 0 19px rgba(222, 90, 225, .25);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: .53;
+}
+
+/* Formulários */
+
+input,
+select,
+textarea,
+#registration-name,
+#registration-poppo,
+#registration-round {
+  background: #1b1534 !important;
+  color: #fff !important;
+  border: 1px solid #745299 !important;
+  border-radius: 10px !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--tla-magenta);
+  outline-offset: 1px;
+}
+
+#registration-panel {
+  border-color: rgba(174, 76, 222, .7);
+}
+
+#registration-submit {
+  color: #151025 !important;
+  background: linear-gradient(
+    135deg, #f8d77f, #d6a64c
+  ) !important;
+}
+
+#registration-confirmation > div {
+  background: #1a1637 !important;
+  border-color: #78539f !important;
+}
+
+#registration-success > div {
+  background: linear-gradient(
+    140deg, #102c29, #141d35
+  ) !important;
+  border-color: #49bb89 !important;
+  box-shadow: 0 0 27px rgba(64, 205, 139, .14);
+}
+
+#registration-success h3 {
+  font-size: 27px;
+}
+
+/* Administração */
+
+body > main {
+  max-width: 1260px;
+}
+
+#admin-panel > .panel:first-child {
+  position: relative;
+  min-height: 290px;
+  padding-right: 320px;
+  overflow: hidden;
+}
+
+#admin-panel .actions {
+  gap: 12px;
+}
+
+#admin-panel .event-card > button,
+#admin-panel .public-event-link {
+  margin: 12px 10px 6px 0;
+}
+
+#admin-panel details {
+  background: rgba(12, 12, 34, .48);
+  border-color: rgba(149, 91, 211, .5);
+}
+
+#admin-panel summary {
+  color: var(--gold);
+}
+
+/* Rodapé */
+
+.footer {
+  margin-top: 48px;
+  border-top: 1px solid rgba(194, 79, 231, .35);
+  background: rgba(9, 8, 25, .6);
+}
+
+.tla-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tla-logo-window--footer {
+  width: 170px;
+  height: 48px;
+}
+
+.tla-logo-window--footer img {
+  width: 450px;
+}
+
+/* Responsividade */
+
+@media (max-width: 900px) {
+  .hero {
+    padding: 42px 10px 24px;
+    min-height: 0;
+  }
+
+  .tla-neo-crop--hero {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: 220px;
+    height: 300px;
+    margin: 20px auto 0;
+  }
+
+  .tla-neo-crop--hero img {
+    width: 1030px;
+  }
+
+  #admin-panel > .panel:first-child {
+    padding-right: 25px;
+    min-height: 0;
+  }
+
+  .tla-neo-crop--admin {
+    display: none;
+  }
+}
+
+@media (max-width: 650px) {
+  .tla-logo-window {
+    width: 153px;
+    height: 48px;
+  }
+
+  .tla-logo-window img {
+    width: 420px;
+  }
+
+  .tla-wordmark {
+    padding-left: 10px;
+    font-size: 11px;
+  }
+
+  .tla-brand {
+    gap: 6px;
+  }
+
+  .topbar-inner {
+    min-height: 70px;
+  }
+
+  body > header {
+    padding: 12px;
+  }
+
+  body > header a {
+    font-size: 12px;
+  }
+
+  .hero h1 {
+    font-size: clamp(34px, 9vw, 48px);
+  }
+
+  .card,
+  .panel,
+  .event-card,
+  .round-row {
+    padding: 18px;
+  }
+
+  .stats {
+    gap: 9px;
+  }
+
+  .event-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .categories {
+    grid-template-columns: 1fr;
+  }
+
+  #registration-submit {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  a,
+  button {
+    transition: none;
+  }
+}
