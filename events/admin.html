@@ -187,6 +187,92 @@
       header { padding: 18px; }
       .panel { padding: 18px; }
     }
+    
+/* =========================================
+   TLA EVENTS - ADMIN UI V2
+   ========================================= */
+
+/* Botoes independentes dos cartoes */
+.event-card > button,
+.event-card > .public-event-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin: 18px 12px 6px 0;
+  min-height: 43px;
+  gap: 8px;
+}
+
+/* Evita espacos criados por mensagens vazias */
+.event-card > .message:empty {
+  display: none;
+}
+
+/* Link para a pagina publica */
+.public-event-link {
+  background: #182b44;
+  border: 1px solid #405675;
+  border-radius: 9px;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #efc66c;
+  text-decoration: none;
+}
+
+.public-event-link:hover {
+  background: #243954;
+}
+
+/* Pesquisa e filtros de participantes */
+.participant-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 18px 0;
+  margin: 16px 0;
+  border-top: 1px solid #30405b;
+  border-bottom: 1px solid #30405b;
+}
+
+.participant-toolbar input,
+.participant-toolbar select {
+  flex: 1 1 180px;
+  width: auto;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.participant-toolbar button {
+  min-height: 43px;
+}
+
+.participant-count {
+  font-size: 13px;
+  color: #aab8ce;
+  margin: 8px 0 16px;
+}
+
+@media (max-width: 600px) {
+  .event-card > button,
+  .event-card > .public-event-link {
+    margin: 12px 8px 4px 0;
+  }
+
+  .participant-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .participant-toolbar input,
+  .participant-toolbar select {
+    width: 100%;
+    flex: none;
+  }
+}
+
   </style>
 </head>
 
@@ -582,6 +668,221 @@ $("logout-button").addEventListener(
 // ========================================
 // LISTAGEM DE EVENTOS
 // ========================================
+
+// ========================================
+// TLA EVENTS - FERRAMENTAS PARTICIPANTES
+// PESQUISA + FILTROS + CSV
+// ========================================
+
+function addParticipantTools(
+  area,
+  registrations,
+  eventSlug,
+  reload
+) {
+  const cards = [
+    ...area.querySelectorAll("article.round-row")
+  ];
+
+  const toolbar = document.createElement("div");
+  toolbar.className = "participant-toolbar";
+
+  const search = document.createElement("input");
+  search.type = "search";
+  search.placeholder = "Pesquisar nome ou Poppo ID";
+  search.setAttribute(
+    "aria-label",
+    "Pesquisar participantes"
+  );
+
+  const category = document.createElement("select");
+  category.setAttribute(
+    "aria-label",
+    "Filtrar por categoria"
+  );
+
+  for (const [value, label] of [
+    ["all", "Todas as categorias"],
+    ["tla", "TLA"],
+    ["sponsor", "Sponsor"],
+    ["public", "Público"]
+  ]) {
+    category.add(new Option(label, value));
+  }
+
+  const status = document.createElement("select");
+  status.setAttribute(
+    "aria-label",
+    "Filtrar por estado"
+  );
+
+  for (const [value, label] of [
+    ["all", "Todos os estados"],
+    ["pending", "Pendentes"],
+    ["confirmed", "Confirmadas"],
+    ["rejected", "Rejeitadas"],
+    ["cancelled", "Canceladas"]
+  ]) {
+    status.add(new Option(label, value));
+  }
+
+  const refresh = document.createElement("button");
+  refresh.type = "button";
+  refresh.className = "secondary";
+  refresh.textContent = "Atualizar lista";
+
+  const exportButton = document.createElement("button");
+  exportButton.type = "button";
+  exportButton.textContent = "Exportar CSV";
+
+  const counter = document.createElement("p");
+  counter.className = "participant-count";
+  counter.setAttribute("role", "status");
+
+  toolbar.append(
+    search,
+    category,
+    status,
+    refresh,
+    exportButton
+  );
+
+  const firstCard = cards[0] || null;
+
+  area.insertBefore(toolbar, firstCard);
+  area.insertBefore(counter, firstCard);
+
+  const normalize = value =>
+    String(value ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+
+  let visibleRows = [];
+
+  function applyFilters() {
+    visibleRows = [];
+
+    registrations.forEach((row, index) => {
+      const card = cards[index];
+
+      if (!card) return;
+
+      const text = normalize(
+        `${row.participant_name} ${row.poppo_id} ` +
+        `${row.round_number}`
+      );
+
+      const matchesSearch = text.includes(
+        normalize(search.value.trim())
+      );
+
+      const matchesCategory =
+        category.value === "all" ||
+        row.category === category.value;
+
+      const matchesStatus =
+        status.value === "all" ||
+        row.status === status.value;
+
+      const visible =
+        matchesSearch &&
+        matchesCategory &&
+        matchesStatus;
+
+      card.hidden = !visible;
+
+      if (visible) {
+        visibleRows.push(row);
+      }
+    });
+
+    counter.textContent =
+      `A mostrar ${visibleRows.length} de ` +
+      `${registrations.length} participante(s).`;
+
+    exportButton.disabled = visibleRows.length === 0;
+  }
+
+  search.addEventListener("input", applyFilters);
+  category.addEventListener("change", applyFilters);
+  status.addEventListener("change", applyFilters);
+
+  refresh.addEventListener("click", async () => {
+    refresh.disabled = true;
+
+    try {
+      await reload();
+    } catch (error) {
+      counter.textContent =
+        "Não foi possível atualizar: " +
+        (error.message || "Erro desconhecido");
+      refresh.disabled = false;
+    }
+  });
+
+  // Protecao contra formulas em ficheiros CSV
+
+  function csvCell(value) {
+    let text = String(value ?? "")
+      .replace(/[\r\n]+/g, " ");
+
+    if (/^\s*[=+\-@]/.test(text)) {
+      text = "'" + text;
+    }
+
+    return '"' + text.replace(/"/g, '""') + '"';
+  }
+
+  exportButton.addEventListener("click", () => {
+    if (visibleRows.length === 0) return;
+
+    const rows = [
+      [
+        "Nome",
+        "Poppo ID",
+        "Categoria",
+        "Estado",
+        "Ronda",
+        "Posicao"
+      ],
+      ...visibleRows.map(row => [
+        row.participant_name,
+        row.poppo_id,
+        row.category,
+        row.status,
+        row.round_number,
+        row.position
+      ])
+    ];
+
+    const csv = "\uFEFF" +
+      rows
+        .map(row => row.map(csvCell).join(";"))
+        .join("\r\n");
+
+    const blob = new Blob([csv], {
+      type: "text/csv;charset=utf-8"
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download =
+      `tla-participantes-${eventSlug}.csv`;
+
+    document.body.append(link);
+    link.click();
+    link.remove();
+
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+    }, 2000);
+  });
+
+  applyFilters();
+}
 
 async function loadAdminEvents() {
   const list = $("admin-events");
@@ -1250,9 +1551,18 @@ async function loadAdminEvents() {
           item.append(actions);
         }
 
+      
         participantsArea.append(item);
       }
+
+      addParticipantTools(
+        participantsArea,
+        registrations,
+        event.event_slug,
+        loadParticipants
+      );
     }
+
 
     participantsButton.addEventListener(
       "click",
@@ -1285,6 +1595,29 @@ async function loadAdminEvents() {
       participantsMessage,
       participantsArea
     );
+
+// ========================================
+// LINK PUBLICO DO EVENTO
+// ========================================
+
+if (
+  !event.archived &&
+  event.event_status === "open"
+) {
+  const publicLink = document.createElement("a");
+
+  publicLink.className = "public-event-link";
+
+  publicLink.href =
+    "./?slug=" + encodeURIComponent(event.event_slug);
+
+  publicLink.target = "_blank";
+  publicLink.rel = "noopener noreferrer";
+
+  publicLink.textContent = "Ver página pública";
+
+  card.append(publicLink);
+}
 
     list.append(card);
   }
