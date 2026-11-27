@@ -22,6 +22,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    
+      - name: Check TLA V2.2 JavaScript
+        run: node --check events/tla-v22.js
+
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
