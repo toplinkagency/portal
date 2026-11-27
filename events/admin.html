@@ -917,6 +917,7 @@ async function loadAdminEvents() {
   for (const event of events) {
     const card = document.createElement("article");
     card.className = "event-card";
+    let refreshRoundPanel = null;
 
     const title = document.createElement("h3");
     title.textContent = event.event_name;
@@ -1081,6 +1082,9 @@ async function loadAdminEvents() {
         categoryActions.className = "actions";
 
         function createCategoryButton(isOpen) {
+          if (refreshRoundPanel) {
+  await refreshRoundPanel();
+}
           const button =
             document.createElement("button");
 
@@ -1245,6 +1249,68 @@ async function loadAdminEvents() {
 
           panel.append(state);
 
+if (event.event_status === "open") {
+  const roundButton = document.createElement("button");
+
+  roundButton.type = "button";
+  roundButton.className =
+    round.status === "open" ? "secondary" : "";
+
+  const nextStatus =
+    round.status === "open" ? "closed" : "open";
+
+  roundButton.textContent =
+    nextStatus === "open"
+      ? "Abrir ronda"
+      : "Fechar ronda";
+
+  roundButton.style.marginBottom = "16px";
+
+  roundButton.addEventListener("click", async () => {
+    const action = nextStatus === "open"
+      ? "abrir"
+      : "fechar";
+
+    if (!confirm(
+      `Pretende ${action} a Ronda ${round.number}?`
+    )) return;
+
+    roundButton.disabled = true;
+
+    try {
+      const { data: result, error } =
+        await supabase.rpc(
+          "tla_admin_set_round_status",
+          {
+            p_round_id: round.id,
+            p_new_status: nextStatus
+          }
+        );
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (result?.success !== true) {
+        throw new Error(
+          "Alteração não confirmada."
+        );
+      }
+
+      await renderRoundDetails();
+
+    } catch (error) {
+      alert(
+        error.message ||
+        "Não foi possível alterar a ronda."
+      );
+      roundButton.disabled = false;
+    }
+  });
+
+  panel.append(roundButton);
+}
+
           for (const category of round.categories || []) {
             const line = document.createElement("div");
 
@@ -1320,7 +1386,11 @@ async function loadAdminEvents() {
           roundArea.append(panel);
         }
       }
-
+refreshRoundPanel = async () => {
+  if (!roundArea.hidden) {
+    await renderRoundDetails();
+  }
+};
       manageButton.addEventListener(
         "click",
         async () => {
