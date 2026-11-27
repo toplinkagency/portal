@@ -1619,6 +1619,258 @@ if (
   card.append(publicLink);
 }
 
+    // ========================================
+    // TLA ADMIN - ARQUIVO E VAGAS RESERVADAS
+    // ========================================
+
+    const finalOperations =
+      document.createElement("div");
+
+    finalOperations.style.cssText =
+      "margin-top:20px;padding-top:16px;" +
+      "border-top:1px solid #30405b;";
+
+    const operationMessage =
+      document.createElement("p");
+
+    operationMessage.className = "message";
+    operationMessage.setAttribute("role", "status");
+
+    function createOperationButton(
+      label,
+      operation,
+      explanation
+    ) {
+      const button = document.createElement("button");
+
+      button.type = "button";
+      button.className = "secondary";
+      button.textContent = label;
+      button.style.marginRight = "10px";
+
+      button.addEventListener("click", async () => {
+        if (!confirm(
+          `${explanation}\n\nEvento: ${event.event_name}`
+        )) return;
+
+        button.disabled = true;
+
+        operationMessage.classList.remove("success");
+        operationMessage.textContent =
+          "A guardar alteração...";
+
+        try {
+          const { data, error } = await supabase.rpc(
+            "tla_admin_operate",
+            {
+              p_event_id: event.event_id,
+              p_operation: operation,
+              p_slot_id: null
+            }
+          );
+
+          if (error) {
+            throw new Error(error.message);
+          }
+
+          if (data?.success !== true) {
+            throw new Error(
+              "Operação não confirmada."
+            );
+          }
+
+          await loadAdminEvents();
+
+        } catch (error) {
+          operationMessage.textContent =
+            error.message || "Erro ao guardar.";
+
+        } finally {
+          button.disabled = false;
+        }
+      });
+
+      return button;
+    }
+
+    // ARQUIVAR EVENTO CONCLUIDO
+
+    if (
+      !event.archived &&
+      event.event_status === "completed"
+    ) {
+      finalOperations.append(
+        createOperationButton(
+          "Arquivar evento",
+          "archive",
+          "Arquivar este evento concluído?"
+        )
+      );
+    }
+
+    // RECUPERAR ARQUIVO - SUPER ADMIN
+
+    if (
+      event.archived &&
+      $("admin-role").textContent === "super_admin"
+    ) {
+      finalOperations.append(
+        createOperationButton(
+          "Recuperar evento",
+          "unarchive",
+          "Recuperar este evento arquivado?"
+        )
+      );
+    }
+
+    // CONVERTER VAGAS RESERVADAS
+    // APENAS EM EVENTOS ABERTOS
+
+    if (
+      !event.archived &&
+      event.event_status === "open" &&
+      Number(event.rounds_count) > 0
+    ) {
+      const section = document.createElement("details");
+
+      section.style.marginTop = "16px";
+
+      const summary = document.createElement("summary");
+      summary.textContent =
+        "Converter vagas TLA/Sponsor para Público";
+
+      const slotList = document.createElement("div");
+      slotList.style.marginTop = "16px";
+
+      section.append(summary, slotList);
+
+      async function loadReservedSlots() {
+        slotList.textContent =
+          "A consultar vagas reservadas...";
+
+        const { data, error } = await supabase.rpc(
+          "tla_admin_free_reserved_slots",
+          {
+            p_event_id: event.event_id
+          }
+        );
+
+        if (error) {
+          slotList.textContent = error.message;
+          return;
+        }
+
+        slotList.replaceChildren();
+
+        const slots = Array.isArray(data) ? data : [];
+
+        if (slots.length === 0) {
+          slotList.textContent =
+            "Não existem vagas reservadas livres.";
+          return;
+        }
+
+        for (const slot of slots) {
+          const row = document.createElement("div");
+
+          row.style.cssText =
+            "display:flex;flex-wrap:wrap;" +
+            "align-items:center;" +
+            "justify-content:space-between;" +
+            "gap:12px;padding:12px 0;" +
+            "border-bottom:1px solid #30405b;";
+
+          const description =
+            document.createElement("span");
+
+          const categoryLabel =
+            slot.category === "tla"
+              ? "TLA"
+              : "Sponsor";
+
+          description.textContent =
+            `Ronda ${slot.round_number}` +
+            ` · Posição ${slot.position}` +
+            ` · ${categoryLabel}`;
+
+          const button =
+            document.createElement("button");
+
+          button.type = "button";
+          button.className = "secondary";
+          button.textContent = "Libertar para Público";
+
+          button.addEventListener("click", async () => {
+            if (!confirm(
+              `Converter a posição ${slot.position} ` +
+              `da Ronda ${slot.round_number}, ` +
+              `atualmente ${categoryLabel}, ` +
+              `numa vaga Público?\n\n` +
+              "Esta operação não deve ser " +
+              "utilizada para participantes inscritos."
+            )) return;
+
+            button.disabled = true;
+
+            operationMessage.classList.remove("success");
+            operationMessage.textContent =
+              "A converter vaga...";
+
+            try {
+              const { data: result, error: saveError } =
+                await supabase.rpc(
+                  "tla_admin_operate",
+                  {
+                    p_event_id: event.event_id,
+                    p_operation: "release",
+                    p_slot_id: slot.slot_id
+                  }
+                );
+
+              if (saveError) {
+                throw new Error(saveError.message);
+              }
+
+              if (result?.success !== true) {
+                throw new Error(
+                  "Conversão não confirmada."
+                );
+              }
+
+              operationMessage.textContent =
+                "Vaga convertida para Público.";
+              operationMessage.classList.add("success");
+
+              await loadReservedSlots();
+
+            } catch (error) {
+              operationMessage.textContent =
+                error.message ||
+                "Não foi possível converter a vaga.";
+
+              button.disabled = false;
+            }
+          });
+
+          row.append(description, button);
+          slotList.append(row);
+        }
+      }
+
+      section.addEventListener("toggle", () => {
+        if (section.open) {
+          loadReservedSlots();
+        }
+      });
+
+      finalOperations.append(section);
+    }
+
+    if (finalOperations.children.length > 0) {
+      finalOperations.append(operationMessage);
+      card.append(finalOperations);
+    }
+
     list.append(card);
   }
 }
