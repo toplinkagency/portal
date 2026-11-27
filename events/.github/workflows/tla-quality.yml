@@ -1,0 +1,146 @@
+
+name: TLA Events Quality Gate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "events/**"
+      - ".github/workflows/tla-quality.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "events/**"
+      - ".github/workflows/tla-quality.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  tla-syntax:
+    name: tla-syntax
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check TLA Events files
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const os = require("node:os");
+          const path = require("node:path");
+          const { spawnSync } = require("node:child_process");
+
+          const files = [
+            "events/index.html",
+            "events/admin.html"
+          ];
+
+          let failures = 0;
+
+          for (const file of files) {
+            const html = fs.readFileSync(file, "utf8");
+
+            const scripts = [
+              ...html.matchAll(
+                /<script\b[^>]*>([\s\S]*?)<\/script\s*>/gi
+              )
+            ];
+
+            if (!scripts.length) {
+              console.error(`${file}: no scripts found`);
+              failures++;
+            }
+
+            scripts.forEach((match, index) => {
+              const code = match[1].trim();
+              if (!code) return;
+
+              const temp = path.join(
+                os.tmpdir(),
+                `tla-${process.pid}-${index}.mjs`
+              );
+
+              fs.writeFileSync(temp, code);
+
+              const result = spawnSync(
+                process.execPath,
+                ["--check", temp],
+                { encoding: "utf8" }
+              );
+
+              fs.unlinkSync(temp);
+
+              if (result.status !== 0) {
+                failures++;
+                console.error(`${file}: syntax error`);
+                console.error(result.stderr);
+              }
+            });
+
+            const markup = html
+              .replace(/<!--[\s\S]*?-->/g, "")
+              .replace(
+                /<script\b[^>]*>[\s\S]*?<\/script\s*>/gi,
+                ""
+              )
+              .replace(
+                /<style\b[^>]*>[\s\S]*?<\/style\s*>/gi,
+                ""
+              );
+
+            const ids = [
+              ...markup.matchAll(
+                /\s+id\s*=\s*(["'])(.*?)\1/gi
+              )
+            ].map(match => match[2]);
+
+            const duplicates = [
+              ...new Set(
+                ids.filter((id, i) => ids.indexOf(id) !== i)
+              )
+            ];
+
+            if (duplicates.length) {
+              failures++;
+              console.error(
+                `${file}: duplicate IDs: ${duplicates.join(", ")}`
+              );
+            }
+
+            if (
+              /sb_secret_|SUPABASE_SERVICE_ROLE_KEY/i.test(html)
+            ) {
+              failures++;
+              console.error(
+                `${file}: privileged key reference detected`
+              );
+            }
+
+            if (
+              file.endsWith("/admin.html") &&
+              !/const\s+SUPABASE_KEY\s*=\s*["']sb_publishable_[a-zA-Z0-9_-]+["']/.test(html)
+            ) {
+              failures++;
+              console.error(
+                `${file}: invalid publishable key configuration`
+              );
+            }
+
+            console.log(`${file}: checked`);
+          }
+
+          if (failures) {
+            console.error(
+              `TLA QUALITY GATE FAILED: ${failures} issue(s)`
+            );
+            process.exit(1);
+          }
+
+          console.log("TLA QUALITY GATE: PASS");
+          NODE
