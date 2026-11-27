@@ -1,0 +1,355 @@
+
+/* =========================================
+   TOP LINK AGENCY — EVENTS V2.1
+   Premium Visual Refinement
+   Apenas estilos. Sem alterações funcionais.
+   ========================================= */
+
+/* FUNDO — SEM LOGOTIPO GIGANTE */
+
+body {
+  background:
+    radial-gradient(
+      ellipse at 82% 15%,
+      rgba(171, 49, 213, .22),
+      transparent 47%
+    ),
+    radial-gradient(
+      ellipse at 10% 70%,
+      rgba(91, 47, 183, .16),
+      transparent 50%
+    ),
+    repeating-linear-gradient(
+      92deg,
+      transparent 0 78px,
+      rgba(175, 57, 224, .035) 80px,
+      transparent 83px
+    ),
+    linear-gradient(
+      145deg,
+      #0d0a20 0%,
+      #170c30 48%,
+      #090b1e 100%
+    );
+  background-attachment: fixed;
+}
+
+/* NEO — RETIRAR ISOLAMENTO PRETO */
+
+.tla-neo-crop {
+  isolation: auto;
+  background: transparent;
+  overflow: hidden;
+}
+
+.tla-neo-crop img {
+  mix-blend-mode: screen;
+  max-width: none;
+  filter: none;
+}
+
+.tla-neo-crop--hero {
+  width: 235px;
+  height: 330px;
+  right: 16px;
+  top: 18px;
+}
+
+.tla-neo-crop--hero img {
+  width: 1120px;
+  left: 0;
+  top: -8px;
+}
+
+.tla-neo-crop--admin {
+  width: 230px;
+  height: 285px;
+  right: 22px;
+  top: 16px;
+}
+
+.tla-neo-crop--admin img {
+  width: 1150px;
+  left: -256px;
+  top: -35px;
+}
+
+/* ESTRUTURA VISUAL */
+
+.hero {
+  min-height: 350px;
+  padding-top: 58px;
+  padding-bottom: 48px;
+}
+
+.hero h1 {
+  font-weight: 850;
+  letter-spacing: -.055em;
+  line-height: 1.07;
+}
+
+.hero .eyebrow {
+  margin-bottom: 18px;
+  letter-spacing: .19em;
+}
+
+.card,
+.panel,
+.event-card,
+.catalog-card {
+  background: linear-gradient(
+    145deg,
+    rgba(34, 24, 65, .95),
+    rgba(15, 13, 36, .97)
+  );
+  border: 1px solid rgba(148, 88, 206, .45);
+  box-shadow:
+    0 14px 38px rgba(0, 0, 0, .14);
+}
+
+.card:hover,
+.catalog-card:hover {
+  border-color: rgba(207, 105, 235, .65);
+}
+
+/* BOTOES PREMIUM */
+
+button,
+.catalog-action,
+.public-event-link {
+  min-height: 44px;
+  border-radius: 11px;
+  font-weight: 750;
+  letter-spacing: .005em;
+  transition:
+    background .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease,
+    transform .2s ease;
+}
+
+button:not(:disabled):hover,
+.catalog-action:hover,
+.public-event-link:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 5px 20px rgba(183, 70, 223, .22);
+}
+
+button:not(:disabled):active {
+  transform: translateY(0);
+}
+
+#new-event-button,
+#create-event-submit,
+#registration-submit {
+  background: linear-gradient(
+    135deg,
+    #ffe49a,
+    #dfae4d
+  ) !important;
+  color: #1b1423 !important;
+  border: 1px solid #ffdb85 !important;
+  box-shadow:
+    0 3px 14px rgba(233, 178, 72, .12);
+}
+
+button.secondary,
+.public-event-link {
+  background: rgba(87, 47, 130, .23);
+  border: 1px solid #73529d;
+  color: #f7efff;
+}
+
+button.secondary:hover,
+.public-event-link:hover {
+  background: rgba(112, 59, 162, .34);
+  border-color: #b778dc;
+}
+
+/* ADMINISTRACAO — CARTOES COMPACTOS */
+
+#admin-panel > .panel:first-child {
+  min-height: 265px;
+}
+
+#admin-panel .event-card {
+  padding: 21px 23px;
+  margin-top: 14px;
+  border-radius: 17px;
+}
+
+#admin-panel .event-card > h3 {
+  font-size: 20px;
+  margin: 0 0 12px;
+  letter-spacing: -.025em;
+}
+
+#admin-panel .event-card > p:nth-of-type(-n+3) {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 13px;
+  margin: 0 13px 15px 0;
+  color: #c9c0df;
+}
+
+#admin-panel .event-card > button,
+#admin-panel .event-card > .public-event-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 9px 5px 0;
+  padding: 11px 15px;
+  min-height: 43px;
+  font-size: 13px;
+}
+
+#admin-panel .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 13px;
+}
+
+#admin-panel .round-row {
+  padding: 17px;
+  margin-bottom: 12px;
+}
+
+#admin-panel details {
+  padding: 14px 17px;
+  margin: 17px 0;
+  background: rgba(12, 10, 31, .48);
+  border: 1px solid rgba(133, 82, 189, .53);
+  border-radius: 12px;
+}
+
+#admin-panel summary {
+  padding: 4px 0;
+  font-weight: 750;
+}
+
+#admin-panel .event-card > .message:empty {
+  display: none;
+}
+
+/* DISPONIBILIDADE E FORMULARIOS */
+
+.category,
+.stat,
+.meta-cell {
+  border-radius: 14px;
+  border: 1px solid rgba(131, 80, 190, .45);
+}
+
+.stat-number,
+.category-count {
+  font-variant-numeric: tabular-nums;
+}
+
+#registration-panel input,
+#registration-panel select,
+#admin-panel input,
+#admin-panel select {
+  min-height: 45px;
+}
+
+#registration-panel {
+  box-shadow:
+    0 10px 38px rgba(0, 0, 0, .16);
+}
+
+.participant-toolbar {
+  gap: 10px;
+}
+
+.participant-toolbar input,
+.participant-toolbar select {
+  min-width: 0;
+}
+
+/* MOBILE */
+
+@media (max-width: 900px) {
+  .hero {
+    padding: 38px 12px 26px;
+    min-height: auto;
+  }
+
+  .tla-neo-crop--hero {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin: 20px auto 0;
+    width: 195px;
+    height: 270px;
+  }
+
+  .tla-neo-crop--hero img {
+    width: 920px;
+    left: 0;
+    top: -6px;
+  }
+
+  .tla-neo-crop--admin {
+    display: none;
+  }
+
+  #admin-panel > .panel:first-child {
+    min-height: auto;
+    padding-right: 22px;
+  }
+}
+
+@media (max-width: 650px) {
+  .hero h1 {
+    font-size: clamp(32px, 8.5vw, 46px);
+  }
+
+  .card,
+  .panel,
+  .event-card {
+    padding: 17px;
+  }
+
+  #admin-panel .event-card {
+    padding: 18px;
+  }
+
+  #admin-panel .event-card > p:nth-of-type(-n+3) {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  #admin-panel .event-card > button,
+  #admin-panel .event-card > .public-event-link {
+    margin: 6px 6px 4px 0;
+  }
+
+  .participant-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .participant-toolbar input,
+  .participant-toolbar select,
+  .participant-toolbar button {
+    width: 100%;
+  }
+
+  .tla-brand {
+    gap: 7px;
+  }
+
+  .tla-wordmark {
+    font-size: 11px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button,
+  .catalog-action,
+  .public-event-link {
+    transition: none;
+  }
+}
