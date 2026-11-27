@@ -1081,7 +1081,7 @@ async function loadAdminEvents() {
           "aria-label", "Categoria de inscrição"
         );
 
-        categorySelect..maxWidth = "240px";
+        categorySelect.style.maxWidth = "240px";
 
         const categoryNames = {
           public: "Público",
@@ -1218,7 +1218,7 @@ if (refreshRoundPanel) {
         document.createElement("div");
 
       roundArea.hidden = true;
-      roundArea..marginTop = "18px";
+      roundArea.style.marginTop = "18px";
 
       async function renderRoundDetails() {
         roundArea.textContent = "A carregar rondas...";
