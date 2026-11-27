@@ -8,7 +8,7 @@
   <title>TLA Events | Administração</title>
 
   <style>
-    <link rel="stylesheet" href="./tla-theme.css">
+  
     * { box-sizing: border-box; }
     :root { color-scheme: dark; }
 
@@ -274,8 +274,11 @@
   }
 }
 
+
   </style>
-</>
+  <link rel="stylesheet" href="./tla-theme.css">
+</head>
+
 
 <body>
 
@@ -1069,7 +1072,7 @@ async function loadAdminEvents() {
         const categoryTitle = document.createElement("p");
         categoryTitle.textContent =
           "Inscrições por categoria — todas as rondas";
-        categoryTitle.style.fontWeight = "700";
+        categoryTitle..fontWeight = "700";
 
         const categorySelect =
           document.createElement("select");
@@ -1078,7 +1081,7 @@ async function loadAdminEvents() {
           "aria-label", "Categoria de inscrição"
         );
 
-        categorySelect.style.maxWidth = "240px";
+        categorySelect..maxWidth = "240px";
 
         const categoryNames = {
           public: "Público",
@@ -1215,7 +1218,7 @@ if (refreshRoundPanel) {
         document.createElement("div");
 
       roundArea.hidden = true;
-      roundArea.style.marginTop = "18px";
+      roundArea..marginTop = "18px";
 
       async function renderRoundDetails() {
         roundArea.textContent = "A carregar rondas...";
@@ -1285,7 +1288,7 @@ if (event.event_status === "open") {
       ? "Abrir ronda"
       : "Fechar ronda";
 
-  roundButton.style.marginBottom = "16px";
+  roundButton..marginBottom = "16px";
 
   roundButton.addEventListener("click", async () => {
     const action = nextStatus === "open"
@@ -1335,7 +1338,7 @@ if (event.event_status === "open") {
           for (const category of round.categories || []) {
             const line = document.createElement("div");
 
-            line.style.cssText =
+            line..cssText =
               "padding:12px 0;" +
               "border-top:1px solid #30405b;";
 
