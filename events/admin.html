@@ -8,6 +8,7 @@
   <title>TLA Events | Administração</title>
 
   <style>
+    <link rel="stylesheet" href="./tla-theme.css">
     * { box-sizing: border-box; }
     :root { color-scheme: dark; }
 
@@ -184,7 +185,7 @@
       .grid, .round-fields {
         grid-template-columns: 1fr;
       }
-      header { padding: 18px; }
+      er { padding: 18px; }
       .panel { padding: 18px; }
     }
     
@@ -274,12 +275,23 @@
 }
 
   </style>
-</head>
+</>
 
 <body>
 
 <header>
-  <div class="brand">TOP LINK AGENCY | EVENTS</div>
+  <div class="brand tla-brand">
+    <span class="tla-logo-window">
+      <img
+        src="./tla-logo.png"
+        alt="Top Link 70007"
+      >
+    </span>
+    <span class="tla-wordmark">
+      TLA EVENTS · ADMIN
+    </span>
+  </div>
+
   <a href="./">Portal público</a>
 </header>
 
@@ -335,6 +347,12 @@
               class="secondary" type="button">
         Terminar sessão
       </button>
+      
+<div class="tla-neo-crop tla-neo-crop--admin"
+     aria-hidden="true">
+  <img src="./tla-neo-grid.png" alt="">
+</div>
+
     </section>
 
     <!-- LISTA DE EVENTOS -->
