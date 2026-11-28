@@ -364,6 +364,34 @@
 
     </section>
 
+<!-- GESTAO DE ADMINISTRADORES V3 -->
+
+<section id="accounts-panel"
+         class="panel" hidden>
+
+  <h2>Gestão de Administradores</h2>
+
+  <p>
+    Área exclusiva do Super Administrador.
+    Consulta e gestão das contas TLA Events.
+  </p>
+
+  <div class="actions">
+    <button id="reload-accounts"
+            class="secondary"
+            type="button">
+      Atualizar administradores
+    </button>
+  </div>
+
+  <p id="accounts-message"
+     class="muted"
+     role="status"></p>
+
+  <div id="accounts-list"></div>
+
+</section>
+
     <!-- LISTA DE EVENTOS -->
 
     <section class="panel">
@@ -615,33 +643,56 @@ function showLogin(message = "") {
   setMessage("login-message", message);
 }
 
+
 function showAdmin(user, admin) {
-  $("admin-email").textContent = user.email || "";
-  $("admin-role").textContent = admin.role;
+  $("admin-email").textContent =
+    admin.display_name || "Conta administrativa";
+
+  $("admin-role").textContent =
+    admin.role === "super_admin"
+      ? "Super Administrador"
+      : "Administrador";
+
+  const isSuperAdmin =
+    admin.role === "super_admin";
+
+  $("accounts-panel").hidden = !isSuperAdmin;
 
   $("login-panel").hidden = true;
   $("admin-panel").hidden = false;
 
+  if (isSuperAdmin) {
+    loadAdminAccounts();
+  }
+
   loadAdminEvents();
 }
+
 
 // ========================================
 // AUTENTICACAO
 // ========================================
 
+
 async function verifyAdministrator(user) {
   const { data: admin, error } = await supabase
     .from("admin_users")
-    .select("user_id, role, is_active")
+    .select(
+      "user_id,display_name,role,is_active," +
+      "account_status,must_change_password"
+    )
     .eq("user_id", user.id)
-    .eq("is_active", true)
     .maybeSingle();
 
-  if (
-    error ||
-    !admin ||
-    !["super_admin", "organizer"].includes(admin.role)
-  ) {
+  const authorized =
+    !error &&
+    admin &&
+    admin.is_active === true &&
+    admin.account_status === "active" &&
+    admin.must_change_password === false &&
+    ["super_admin", "organizer"].includes(admin.role);
+
+  if (!authorized) {
     await supabase.auth.signOut();
     showLogin("Conta sem autorização administrativa.");
     return;
@@ -649,6 +700,7 @@ async function verifyAdministrator(user) {
 
   showAdmin(user, admin);
 }
+
 
 $("login-form").addEventListener(
   "submit",
@@ -690,6 +742,57 @@ $("logout-button").addEventListener(
     showLogin();
     $("login-form").reset();
   }
+);
+
+async function loadAdminAccounts() {
+  const area = $("accounts-list");
+  const status = $("accounts-message");
+
+  area.replaceChildren();
+  status.textContent = "A carregar administradores...";
+
+  const { data, error } = await supabase.rpc(
+    "tla_admin_list_accounts"
+  );
+
+  if (error) {
+    status.textContent =
+      "Não foi possível consultar os administradores.";
+    return;
+  }
+
+  const accounts = Array.isArray(data) ? data : [];
+
+  status.textContent =
+    `${accounts.length} conta(s) administrativa(s).`;
+
+  for (const account of accounts) {
+    const card = document.createElement("article");
+    card.className = "event-card";
+
+    const name = document.createElement("h3");
+    name.textContent = account.display_name;
+
+    const role = document.createElement("p");
+    role.textContent =
+      account.role === "super_admin"
+        ? "Super Administrador"
+        : "Administrador";
+
+    const state = document.createElement("p");
+    state.textContent =
+      account.is_active
+        ? "Estado: Ativo"
+        : "Estado: Inativo";
+
+    card.append(name, role, state);
+    area.appendChild(card);
+  }
+}
+
+$("reload-accounts").addEventListener(
+  "click",
+  loadAdminAccounts
 );
 
 // ========================================
